@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+//CalculateSHNCharges() method
 namespace COVID_19_Monitoring_System
 {
     class Person
@@ -20,7 +21,54 @@ namespace COVID_19_Monitoring_System
             set { name = value; }
         }
 
+        private List<SafeEntry> safeEntryList;  
 
+        public List<SafeEntry> SafeEntryList
+        {
+            get { return safeEntryList; }
+            set { safeEntryList = value; }
+        }
+
+        private List<TravelEntry> travelEntryList;  
+
+        public List<TravelEntry> TravelEntryList
+        {
+            get { return travelEntryList; }
+            set { travelEntryList = value; }
+        }
+
+        public Person()
+        {
+
+        }
+
+        public Person(string n)
+        {
+            Name = n;
+            SafeEntryList = new List<SafeEntry>();
+            TravelEntryList = new List<TravelEntry>();
+        }
+
+        public void AddTravelEntry(TravelEntry te)
+        {
+            TravelEntryList.Add(te);
+        }
+
+        public void AddSafeEntry(SafeEntry se)
+        {
+            SafeEntryList.Add(se);
+        }
+
+        public double CalculateSHNCharges()
+        {
+            return 0;
+        }
+
+
+        public override string ToString()
+        {
+            return base.ToString();
+        }
 
     }
 }
