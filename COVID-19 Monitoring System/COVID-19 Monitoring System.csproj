@@ -6,4 +6,13 @@
     <RootNamespace>COVID_19_Monitoring_System</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Update="BusinessLocation.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Person.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
