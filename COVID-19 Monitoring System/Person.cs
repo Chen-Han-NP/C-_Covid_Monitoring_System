@@ -8,10 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-//CalculateSHNCharges() method
 namespace COVID_19_Monitoring_System
 {
-    class Person
+    abstract class Person
     {
         private string name;
 
@@ -59,11 +58,7 @@ namespace COVID_19_Monitoring_System
             SafeEntryList.Add(se);
         }
 
-        public double CalculateSHNCharges()
-        {
-            return 0;
-        }
-
+        abstract public double CalculateSHNCharges();
 
         public override string ToString()
         {

@@ -8,9 +8,49 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+//CalculateSHNCharges() method
 namespace COVID_19_Monitoring_System
 {
-    class Resident
+    class Resident: Person
     {
+        private string address;
+
+        public string Address
+        {
+            get { return address; }
+            set { address = value; }
+        }
+
+        private DateTime lastLeftCountry;
+
+        public DateTime LastLeftCountry
+        {
+            get { return lastLeftCountry; }
+            set { lastLeftCountry = value; }
+        }
+
+        private TraceTogetherToken token;
+
+        public TraceTogetherToken Token
+        {
+            get { return token; }
+            set { token = value; }
+        }
+
+        public Resident(string n, string a, DateTime dt) : base(n)
+        {
+            Address = a;
+            LastLeftCountry = dt;
+        }
+
+        public override double CalculateSHNCharges()
+        {
+            return 0;
+        }
+
+        public override string ToString()
+        {
+            return "Address: " + Address + "\nLast Left Country: " + LastLeftCountry;
+        }
     }
 }
