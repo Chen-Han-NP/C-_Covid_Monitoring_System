@@ -8,9 +8,62 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+//IsEligibleForReplacement()
 namespace COVID_19_Monitoring_System
 {
     class TraceTogetherToken
     {
+
+        //attributes
+        private string serialNo;
+
+        public string SerialNo
+        {
+            get { return serialNo; }
+            set { serialNo = value; }
+        }
+
+        private string collectionLocation;
+
+        public string CollectionLocation
+        {
+            get { return collectionLocation; }
+            set { collectionLocation = value; }
+        }
+
+        private DateTime expiryDate;
+
+        public DateTime ExpiryDate
+        {
+            get { return expiryDate; }
+            set { expiryDate = value; }
+        }
+
+        //methods
+        public TraceTogetherToken() { }
+
+        public TraceTogetherToken(string sn, string cl, DateTime xd)
+        {
+            SerialNo = sn;
+            CollectionLocation = cl;
+            ExpiryDate = xd;
+        }
+
+        public bool IsEligibleForReplacement()
+        {
+            return false;
+        }
+
+        public void ReplaceToken(string sn, string cl)
+        {
+            SerialNo = sn;
+            CollectionLocation = cl;
+        }
+
+        public override string ToString()
+        {
+            return base.ToString() + "Serial No.: " + SerialNo + "\tCollection Location: " + CollectionLocation + "\tExpiry Date: " + ExpiryDate;
+        }
+
     }
 }
