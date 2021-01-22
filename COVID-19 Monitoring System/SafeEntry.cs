@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-//PerformCheckOut() method
+//Done
 namespace COVID_19_Monitoring_System
 {
     class SafeEntry
@@ -53,7 +53,8 @@ namespace COVID_19_Monitoring_System
 
         public void PerformCheckOut()
         {
-            Console.WriteLine();
+            Location.VisitorsNow -= 1;
+            Console.WriteLine("User has been checked out.");
         }
 
         public override string ToString()

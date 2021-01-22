@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-//AssignFacility(), CalculateSHNDuration()
+//Done
 namespace COVID_19_Monitoring_System
 {
     class TravelEntry
@@ -73,12 +73,27 @@ namespace COVID_19_Monitoring_System
 
         public void AssignSHNFacility(SHNFacility shn)
         {
-            shn = new SHNFacility();
+            ShnStay = shn;
         }
 
         public void CalculateSHNDuration()
         {
-            
+            //Check Last Country of Embarkation & gives SHN Days
+            if (LastCoutryOfEmbarkation == "New Zealand" || LastCoutryOfEmbarkation == "Vietnam")
+            {
+                ShnEndDate = EntryDate;
+                Console.WriteLine("No. of SHN Days: {0}", (ShnEndDate - EntryDate));
+            }
+            else if(LastCoutryOfEmbarkation == "Macao SAR")
+            {
+                ShnEndDate = EntryDate.AddDays(7);
+                Console.WriteLine("No. of SHN Days: {0}", (ShnEndDate - EntryDate));
+            }
+            else
+            {
+                ShnEndDate = EntryDate.AddDays(14);
+                Console.WriteLine("No. of SHN Days: {0}", (ShnEndDate - EntryDate));
+            }
         }
 
         public override string ToString()

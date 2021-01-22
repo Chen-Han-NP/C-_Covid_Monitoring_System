@@ -75,9 +75,12 @@ namespace COVID_19_Monitoring_System
             DistFromLandCheckpoint = lc;
         }
 
-        //Add string, DateTime
-        public double CalculateTravelCost()
+        //Add TravelEntry into CalculaeTravelCost
+        public double CalculateTravelCost(string em, DateTime ed)
         {
+            TravelEntry te = new TravelEntry();
+            te.EntryMode = em;
+            te.EntryDate = ed;
             return 0;
         }
 
