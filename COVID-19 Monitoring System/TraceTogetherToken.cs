@@ -51,7 +51,11 @@ namespace COVID_19_Monitoring_System
 
         public bool IsEligibleForReplacement()
         {
-            return false;
+            DateTime currentDate = DateTime.Now;
+            if ((ExpiryDate < currentDate) && (currentDate < ExpiryDate.AddMonths(1)))
+                return true;
+            else
+                return false;
         }
 
         public void ReplaceToken(string sn, string cl)
