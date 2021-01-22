@@ -43,7 +43,7 @@ namespace COVID_19_Monitoring_System
 
         public override string ToString()
         {
-            return "Passport No: " + PassportNo + "\nNationality: " + Nationality + "Name: " + Name;
+            return "Name: " + Name + "\nPassport No: " + PassportNo + "\nNationality: " + Nationality;
         }
 
 
