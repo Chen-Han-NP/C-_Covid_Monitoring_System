@@ -501,7 +501,7 @@ namespace COVID_19_Monitoring_System
                                     }
                                 }
                             }
-                            visitor.TravelEntryList.Add(te);
+                            visitor.AddTravelEntry(te);
                         }
                         pList.Add(visitor);
                         
@@ -542,7 +542,7 @@ namespace COVID_19_Monitoring_System
                                     }
                                 }
                             }
-                            resident.TravelEntryList.Add(te);
+                            resident.AddTravelEntry(te);
                         }
                         pList.Add(resident);
 
