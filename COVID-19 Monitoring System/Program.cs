@@ -75,7 +75,8 @@ namespace COVID_19_Monitoring_System
             while (true)
             {
 
-                Console.Write("\n========COVID-19 Monitoring System========\n[1] List all Visitors and Residents\n[2] List Person Details\n[3] Assign/Replace TraceTogether Token \n[4] List all Business Locations \n[0] Exit \nChoice: ");
+                Console.Write("\n========COVID-19 Monitoring System========\n[1] List all Visitors and Residents\n[2] List Person Details\n[3] Assign/Replace TraceTogether Token \n[4] List all Business Locations "+
+                    "\n[5] Edit Business Location Capacity\n[0] Exit \nChoice: ");
                 string choice = Console.ReadLine();
 
                 if (choice == "0")
@@ -185,6 +186,36 @@ namespace COVID_19_Monitoring_System
                 {
                     DisplayBusinessLocation(businessList);
                 }
+
+                //Task 7
+                else if (choice == "5")
+                {
+                    bool found = false;
+                    DisplayBusinessLocation(businessList);
+                    Console.Write("\nEnter Business Name to search: ");
+                    string businessName = Console.ReadLine();
+                    foreach (BusinessLocation bl in businessList)
+                    {
+                        if (bl.BusinessName == businessName)
+                        {
+                            //DO EXCEPTION HANDLING
+                            found = true;
+                            Console.Write("{0} found!\nPlease enter the new Maximum Capcity: ", bl.BusinessName);
+                            int newMax = Convert.ToInt32(Console.ReadLine());
+                            bl.MaximumCapacity = newMax;
+                            DisplayBusinessLocation(businessList);
+                            break;
+                        }
+                    }
+                    if (!found)
+                    {
+                        Console.WriteLine("Not found!");
+                    }
+                    
+                }
+
+
+
 
 
             }
