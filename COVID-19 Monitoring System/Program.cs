@@ -13,23 +13,11 @@ using System.Globalization;
 using Newtonsoft.Json;
 
 /* TO DO 
-1) Load Person and Business Location Data
-    1. load both given CSV and populate two lists
-2) Load SHN Facility Data
-    1. call API and populate a list
-3) List all Visitors
-4) List Person Details
-    1. prompt user for name
-    2. search for person
-    3. list person details including TravelEntry and SafeEntry details
-        i. if resident, display TraceTogetherToken details
+
 5) Assign/Replace TraceTogether Token
-    1. prompt user for name
-    2. search for resident name
-    3. create and assign a TraceTogetherToken object if resident has no existing
-    token
-    4. replace token if it meets the criteria stipulated in the background brief
-6) List all Business Locations
+    3. create and assign a TraceTogetherToken object if resident has no existing (Collection location????)
+
+
 7) Edit Business Location Capacity
     1. prompt user to enter details
     2. search for business location
@@ -89,7 +77,7 @@ namespace COVID_19_Monitoring_System
                 DisplayVisitors(visitorList);
                 DisplayResidents(residentList);
 
-                Console.Write("\n[1] List person detail.\n[2] Assign/Replace TraceTogether Token. \n[0] Exit \nChoice: ");
+                Console.Write("\n[1] List person detail.\n[2] Assign/Replace TraceTogether Token. \n[3] List all business locations. \n[0] Exit \nChoice: ");
                 string choice = Console.ReadLine();
                 if (choice == "0")
                 {
@@ -186,7 +174,11 @@ namespace COVID_19_Monitoring_System
 
                 }
                  
-                
+                //Task 6
+                else if (choice == "3")
+                {
+                    DisplayBusinessLocation(businessList);
+                }
 
 
             }
@@ -312,6 +304,20 @@ namespace COVID_19_Monitoring_System
 
         }
 
+        static void DisplayBusinessLocation(List<BusinessLocation> bList)
+        {
+            Console.WriteLine("\nBusinessLocations");
+            Console.WriteLine("{0, -25} {1, -14} {2, -20}", "Business Name", "Branch Code", "Maximum Capacity");
+
+            foreach (BusinessLocation bl in bList)
+            {
+                Console.WriteLine("{0, -25} {1, -14} {2, -20}", bl.BusinessName, bl.BranchCode, bl.MaximumCapacity);
+            }
+        }
+            
+
+            
+
 
         static void DisplayVisitors(List<Visitor> vList)
         {
@@ -348,7 +354,6 @@ namespace COVID_19_Monitoring_System
 
             }
 
-           
         }
 
 
