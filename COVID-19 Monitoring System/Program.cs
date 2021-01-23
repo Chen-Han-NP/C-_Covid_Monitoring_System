@@ -69,7 +69,7 @@ namespace COVID_19_Monitoring_System
             {
 
                 Console.Write("\n========COVID-19 Monitoring System========\n[1] Display all Visitors and Residents\n[2] List Person Details\n[3] Assign/Replace TraceTogether Token \n[4] Display all Business Locations " +
-                    "\n[5] Edit Business Location Capacity\n[6] Display all SafeEntry records\n[7] Perform SafeEntry Check-In \n[8] Perform SafeEntry Check-out " +
+                    "\n[5] Edit Business Location Capacity\n[6] Display all SafeEntry records\n[7] Perform SafeEntry Check-In \n[8] Perform SafeEntry Check-out \n[9] Display all SHN facilities" +
                     "\n[0] Exit \nChoice: ");
                 string choice = Console.ReadLine();
 
@@ -348,6 +348,12 @@ namespace COVID_19_Monitoring_System
                     }
                 }
 
+                // Task 10
+                else if (choice == "9")
+                {
+                    List<SHNFacility> SHNList = GetSHNFacilityDetail();
+                    DisplaySHNFacilities(SHNList);
+                }
 
             }
 
@@ -384,6 +390,16 @@ namespace COVID_19_Monitoring_System
             }
 
 
+        }
+
+        static void DisplaySHNFacilities(List<SHNFacility> fList)
+        {
+            Console.WriteLine("\nSHN Facilities");
+            Console.WriteLine("{0, -20}{1, -20}{2, -25}{3, -25}{4, -27}", "Facility Name", "Facility Capacity", "Dist from air checkpoint", "Dist from sea checkpoint", "Dist from land checkpoint");
+            foreach(SHNFacility f in fList)
+            {
+                Console.WriteLine("{0, -20}{1, -20}{2, -25}{3, -25}{4, -27}", f.FacilityName, f.FacilityCapacity, f.DistFromAirCheckpoint, f.DistFromSeaCheckpoint, f.DistFromLandCheckpoint);
+            }
         }
 
         static void LoadPersonData(List<Person> pList)
