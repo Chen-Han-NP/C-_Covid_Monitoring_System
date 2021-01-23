@@ -23,6 +23,25 @@ using Newtonsoft.Json;
     2. search for person
     3. list person details including TravelEntry and SafeEntry details
         i. if resident, display TraceTogetherToken details
+5) Assign/Replace TraceTogether Token
+    1. prompt user for name
+    2. search for resident name
+    3. create and assign a TraceTogetherToken object if resident has no existing
+    token
+    4. replace token if it meets the criteria stipulated in the background brief
+6) List all Business Locations
+7) Edit Business Location Capacity
+    1. prompt user to enter details
+    2. search for business location
+    3. prompt user to edit maximum capacity
+8) SafeEntry Check-in
+    1. prompt user for name
+    2. search for person
+    3. list all business locations
+    4. prompt user to select for business location to check-in
+    5. create SafeEntry object if the location is not full, and increase visitorsNow
+    count
+    6. add SafeEntry object to person
 */
 
 
@@ -42,6 +61,8 @@ namespace COVID_19_Monitoring_System
             //Task 3 
             List<Visitor> visitorList = new List<Visitor>();
             List<Resident> residentList = new List<Resident>();
+            List<String> serialNums = new List<String>();
+
             foreach (Person p in personList)
             {
                 if (p is Visitor)
@@ -53,6 +74,11 @@ namespace COVID_19_Monitoring_System
                 {
                     Resident r = (Resident)p;
                     residentList.Add(r);
+                    if (r.Token != null)
+                    {
+                        serialNums.Add(r.Token.SerialNo);
+                        
+                    }
                 }
             }
 
@@ -60,8 +86,10 @@ namespace COVID_19_Monitoring_System
             
             while (true)
             {
+                DisplayVisitors(visitorList);
+                DisplayResidents(residentList);
 
-                Console.Write("\n[1] List person detail. \n[0] Exit \nChoice: ");
+                Console.Write("\n[1] List person detail.\n[2] Assign/Replace TraceTogether Token. \n[0] Exit \nChoice: ");
                 string choice = Console.ReadLine();
                 if (choice == "0")
                 {
@@ -72,8 +100,7 @@ namespace COVID_19_Monitoring_System
                 {
                     //DO EXCEPTION HANDLING
                     //Task 4.1
-                    DisplayVisitors(visitorList);
-                    DisplayResidents(residentList);
+                  
                     Console.Write("\nEnter person name: ");
                     string name = Console.ReadLine();
 
@@ -112,7 +139,53 @@ namespace COVID_19_Monitoring_System
                         }
                     }
                 }
-                
+
+                //Task 5
+                else if (choice == "2")
+                {
+                    Console.Write("\nEnter resident name: ");
+                    string name = Console.ReadLine();
+                    foreach (Resident r in residentList)
+                    {
+                        if (r.Name == name)
+                        {
+                            DateTime currentDate = DateTime.Now;
+                            if (r.Token != null)
+                            {
+                                if (r.Token.IsEligibleForReplacement() == true)
+                                {
+                                    r.Token.ReplaceToken(r.Token.SerialNo, r.Token.CollectionLocation);
+                                    Console.WriteLine("{0} is eligible for replacement! \nThe new expiry date is {1}", r.Name, r.Token.ExpiryDate);
+                                }
+                                else
+                                {
+                                    
+                                    if (currentDate > r.Token.ExpiryDate.AddMonths(1))
+                                        Console.WriteLine("{0} is not eligible for replacement as the token has exceeded the expiry date for more than one month.", r.Name);
+                                    else
+                                        Console.WriteLine("{0} is not eligible for replacement as the token has not expired yet.", r.Name);
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("{0} has no token, assigning new token...", r.Name);
+                                String newSerialNo = GetRandomSerialNo(serialNums);
+                                serialNums.Add(newSerialNo);
+
+                                //ASK CHER
+                                string newCL = "(idk)";
+                                DateTime newExpiryDate = currentDate.AddMonths(6);
+                                TraceTogetherToken token = new TraceTogetherToken(newSerialNo, newCL, newExpiryDate);
+
+                                r.Token = token;
+
+
+                            }
+                        }
+                    }
+
+                }
+                 
                 
 
 
@@ -259,6 +332,23 @@ namespace COVID_19_Monitoring_System
                 Console.WriteLine(r.Name);
             }
 
+        }
+
+        static String GetRandomSerialNo(List<String> sList)
+        {
+            while (true)
+            {
+                Random random = new Random();
+                int randomNum = random.Next(10000, 99999);
+                String output = "T" + randomNum;
+                if (!sList.Contains(output))
+                {
+                    return output;
+                }
+
+            }
+
+           
         }
 
 

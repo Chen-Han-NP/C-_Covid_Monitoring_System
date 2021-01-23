@@ -52,7 +52,7 @@ namespace COVID_19_Monitoring_System
         public bool IsEligibleForReplacement()
         {
             DateTime currentDate = DateTime.Now;
-            if ((ExpiryDate < currentDate) && (currentDate < ExpiryDate.AddMonths(1)))
+            if ((ExpiryDate < currentDate) && (currentDate <= ExpiryDate.AddMonths(1)))
                 return true;
             else
                 return false;
@@ -62,6 +62,9 @@ namespace COVID_19_Monitoring_System
         {
             SerialNo = sn;
             CollectionLocation = cl;
+            DateTime currentDate = DateTime.Now;
+            DateTime newExpiryDate = currentDate.AddMonths(6);
+            ExpiryDate = newExpiryDate;
         }
 
         public override string ToString()
