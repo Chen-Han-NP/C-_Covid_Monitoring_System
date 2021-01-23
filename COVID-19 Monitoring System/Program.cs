@@ -74,17 +74,23 @@ namespace COVID_19_Monitoring_System
             
             while (true)
             {
-                DisplayVisitors(visitorList);
-                DisplayResidents(residentList);
 
-                Console.Write("\n[1] List person detail.\n[2] Assign/Replace TraceTogether Token. \n[3] List all business locations. \n[0] Exit \nChoice: ");
+                Console.Write("\n========COVID-19 Monitoring System========\n[1] List all Visitors and Residents\n[2] List Person Details\n[3] Assign/Replace TraceTogether Token \n[4] List all Business Locations \n[0] Exit \nChoice: ");
                 string choice = Console.ReadLine();
+
                 if (choice == "0")
                 {
                     break;
                 }
 
+                //Task 3
                 else if (choice == "1")
+                {
+                    DisplayVisitors(visitorList);
+                    DisplayResidents(residentList);
+                }
+
+                else if (choice == "2")
                 {
                     //DO EXCEPTION HANDLING
                     //Task 4.1
@@ -129,7 +135,7 @@ namespace COVID_19_Monitoring_System
                 }
 
                 //Task 5
-                else if (choice == "2")
+                else if (choice == "3")
                 {
                     Console.Write("\nEnter resident name: ");
                     string name = Console.ReadLine();
@@ -175,7 +181,7 @@ namespace COVID_19_Monitoring_System
                 }
                  
                 //Task 6
-                else if (choice == "3")
+                else if (choice == "4")
                 {
                     DisplayBusinessLocation(businessList);
                 }

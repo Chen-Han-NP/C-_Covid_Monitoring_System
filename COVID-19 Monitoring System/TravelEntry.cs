@@ -98,7 +98,7 @@ namespace COVID_19_Monitoring_System
 
         public override string ToString()
         {
-            return  "Last Country of Embarkation: " + LastCoutryOfEmbarkation + "\nEntry Mode: " + EntryMode + "\nEntry Date: " + EntryDate + "\nSHN End Date: " + ShnEndDate + "\nTravels paid: " + IsPaid;
+            return  "<---Travel Entry Info--->" + "\nLast Country of Embarkation: " + LastCoutryOfEmbarkation + "\nEntry Mode: " + EntryMode + "\nEntry Date: " + EntryDate + "\nSHN End Date: " + ShnEndDate + "\nTravels paid: " + IsPaid;
         }
 
     }
