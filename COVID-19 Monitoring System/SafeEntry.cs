@@ -54,6 +54,7 @@ namespace COVID_19_Monitoring_System
         public void PerformCheckOut()
         {
             Location.VisitorsNow -= 1;
+            CheckOut = DateTime.Now;
             Console.WriteLine("User has been checked out.");
         }
 

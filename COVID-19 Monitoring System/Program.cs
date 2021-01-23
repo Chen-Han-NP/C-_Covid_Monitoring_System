@@ -17,14 +17,12 @@ using Newtonsoft.Json;
 5) Assign/Replace TraceTogether Token
     3. create and assign a TraceTogetherToken object if resident has no existing (Collection location????)
 
-8) SafeEntry Check-in
-    1. prompt user for name
-    2. search for person
-    3. list all business locations
-    4. prompt user to select for business location to check-in
-    5. create SafeEntry object if the location is not full, and increase visitorsNow
-    count
-    6. add SafeEntry object to person
+9) SafeEntry Check-out
+1. prompt user for name
+2. search for person
+3. list SafeEntry records for that person that have not been checked-out
+4. prompt user to select record to check-out
+5. call PerformCheckOut() to check-out, and reduce visitorsNow by 1
 */
 
 
@@ -66,12 +64,13 @@ namespace COVID_19_Monitoring_System
             }
 
 
-            
+
             while (true)
             {
 
-                Console.Write("\n========COVID-19 Monitoring System========\n[1] List all Visitors and Residents\n[2] List Person Details\n[3] Assign/Replace TraceTogether Token \n[4] List all Business Locations "+
-                    "\n[5] Edit Business Location Capacity\n[6] SafeEntry Check-In \n[0] Exit \nChoice: ");
+                Console.Write("\n========COVID-19 Monitoring System========\n[1] Display all Visitors and Residents\n[2] List Person Details\n[3] Assign/Replace TraceTogether Token \n[4] Display all Business Locations " +
+                    "\n[5] Edit Business Location Capacity\n[6] Display all SafeEntry records\n[7] Perform SafeEntry Check-In \n[8] Perform SafeEntry Check-out " +
+                    "\n[0] Exit \nChoice: ");
                 string choice = Console.ReadLine();
 
                 if (choice == "0")
@@ -90,7 +89,7 @@ namespace COVID_19_Monitoring_System
                 {
                     //DO EXCEPTION HANDLING
                     //Task 4.1
-                  
+
                     Console.Write("\nEnter person name: ");
                     string name = Console.ReadLine();
 
@@ -149,7 +148,7 @@ namespace COVID_19_Monitoring_System
                                 }
                                 else
                                 {
-                                    
+
                                     if (currentDate > r.Token.ExpiryDate.AddMonths(1))
                                         Console.WriteLine("{0} is not eligible for replacement as the token has exceeded the expiry date for more than one month.", r.Name);
                                     else
@@ -175,7 +174,7 @@ namespace COVID_19_Monitoring_System
                     }
 
                 }
-                 
+
                 //Task 6
                 else if (choice == "4")
                 {
@@ -206,11 +205,16 @@ namespace COVID_19_Monitoring_System
                     {
                         Console.WriteLine("Not found!");
                     }
-                    
+
+                }
+
+                else if (choice == "6")
+                {
+                    DisplaySafeEntryRecords(personList);
                 }
 
                 //Task 8
-                else if (choice == "6")
+                else if (choice == "7")
                 {
                     Console.Write("Enter person name: ");
                     string name = Console.ReadLine();
@@ -219,9 +223,9 @@ namespace COVID_19_Monitoring_System
 
                     foreach (Person p in personList)
                     {
-                        if(p.Name == name)
+                        if (p.Name == name)
                         {
-                            while (true) 
+                            while (true)
                             {
                                 personFound = true;
                                 Console.WriteLine("{0} found!", p.Name);
@@ -254,20 +258,95 @@ namespace COVID_19_Monitoring_System
                                     Console.WriteLine("'{0}' not found. Please try again.", bName);
                                 else
                                     break;
-                                
                             }
-                           
                         }
-
                     }
                     if (!personFound)
                     {
                         Console.WriteLine("'{0}' not found. Please try again.", name);
                     }
-
-
                 }
 
+
+                // Task 9
+                else if (choice == "8")
+                {
+                    Console.Write("Enter person name: ");
+                    string name = Console.ReadLine();
+                    bool personFound = false;
+
+                    foreach (Person p in personList)
+                    {
+                        if (p.Name == name)
+                        {
+                            personFound = true;
+
+                            // Check whether this person has any SafeEntry records.
+                            if (p.SafeEntryList.Count <= 0)
+                            {
+                                Console.WriteLine("Person {0} does not have any SafeEntry record yet! ", p.Name);
+                            }
+                            else
+                            {
+                                bool isThereCheckedOut = false;
+                                List<Int32> recordNumList = new List<Int32>();
+
+                                //Check whether this person has any SafeEntry that has not been checked out yet.
+                                Console.WriteLine("<---SafeEntry Records for {0}--->", p.Name);
+
+                                for (int i = 0; i < p.SafeEntryList.Count; i++)
+                                {
+                                    DateTime dt = new DateTime();
+                                    if (p.SafeEntryList[i].CheckOut == dt)
+                                    {
+                                        isThereCheckedOut = true;
+                                        recordNumList.Add(i + 1);
+                                        Console.WriteLine("Record No: {0}", i + 1);
+                                        Console.WriteLine("{0, -20} {1, -20} {2, -20}", "Check-In", "Check-Out", "Business Location");
+                                        Console.WriteLine("{0, -20} {1, -20} {2, -20}", p.SafeEntryList[i].CheckIn, p.SafeEntryList[i].CheckOut, p.SafeEntryList[i].Location.BusinessName);
+                                        Console.WriteLine();
+
+
+
+                                    }
+                                }
+                                if (!isThereCheckedOut)
+                                {
+                                    Console.WriteLine("Sorry, no SafeEntry record that has not been checked out yet!");
+                                }
+                                else
+                                {
+                                    Console.Write("\nPlease enter which record to check-out: ");
+                                    //EXCEPTION HANDLING
+                                    int result = Convert.ToInt32(Console.ReadLine());
+                                    //Check whether the number has exceeded the size of the SafeEntryList
+                                    if (result <= p.SafeEntryList.Count)
+                                    {
+                                        //Now check whether the user has entered the correct Record No given in the list above.
+                                        if (recordNumList.Contains(result))
+                                        {
+                                            p.SafeEntryList[result - 1].PerformCheckOut();
+                                            Console.WriteLine("{0} has checked out from the {1}.", p.Name, p.SafeEntryList[result - 1].Location.BusinessName);
+                                        }
+                                        else
+                                        {
+                                            Console.WriteLine("Please do not enter Record No that has already been checked out!");
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("No such record found! ");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (!personFound)
+                    {
+                        Console.WriteLine("'{0}' not found. Please try again.", name);
+                    }
+                }
 
 
             }
@@ -445,7 +524,33 @@ namespace COVID_19_Monitoring_System
 
         }
 
+        static void DisplaySafeEntryRecords(List<Person> pList)
+        {
+            bool isEmpty = true;
 
+            Console.WriteLine("<---SafeEntry Records for everyone--->");
+            foreach (Person p in pList)
+            {
+                if (p.SafeEntryList.Count > 0)
+                {
+                    isEmpty = false;
+                    Console.WriteLine("For person: " + p.Name + ": ");
+                    Console.WriteLine("{0, -20} {1, -20} {2, -20}", "Check-In", "Check-Out", "Business Location");
+                    foreach(SafeEntry se in p.SafeEntryList)
+                    {
+                        Console.WriteLine("{0, -20} {1, -20} {2, -20}", se.CheckIn, se.CheckOut, se.Location.BusinessName);
+
+                    }
+                }
+            }
+
+            if (isEmpty)
+            {
+                Console.WriteLine("No records found!");
+            }
+
+        }
+            
 
     }
 }
