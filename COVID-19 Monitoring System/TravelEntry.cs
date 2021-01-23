@@ -69,6 +69,7 @@ namespace COVID_19_Monitoring_System
             LastCoutryOfEmbarkation = lcoe;
             EntryMode = em;
             EntryDate = ed;
+            isPaid = false;
         }
 
         public void AssignSHNFacility(SHNFacility shn)
@@ -82,23 +83,23 @@ namespace COVID_19_Monitoring_System
             if (LastCoutryOfEmbarkation == "New Zealand" || LastCoutryOfEmbarkation == "Vietnam")
             {
                 ShnEndDate = EntryDate;
-                Console.WriteLine("No. of SHN Days: {0}", (ShnEndDate - EntryDate));
+                //Console.WriteLine("No. of SHN Days: {0}", (ShnEndDate - EntryDate));
             }
             else if(LastCoutryOfEmbarkation == "Macao SAR")
             {
                 ShnEndDate = EntryDate.AddDays(7);
-                Console.WriteLine("No. of SHN Days: {0}", (ShnEndDate - EntryDate));
+                //Console.WriteLine("No. of SHN Days: {0}", (ShnEndDate - EntryDate));
             }
             else
             {
                 ShnEndDate = EntryDate.AddDays(14);
-                Console.WriteLine("No. of SHN Days: {0}", (ShnEndDate - EntryDate));
+                //Console.WriteLine("No. of SHN Days: {0}", (ShnEndDate - EntryDate));
             }
         }
 
         public override string ToString()
         {
-            return  "<---Travel Entry Info--->" + "\nLast Country of Embarkation: " + LastCoutryOfEmbarkation + "\nEntry Mode: " + EntryMode + "\nEntry Date: " + EntryDate + "\nSHN End Date: " + ShnEndDate + "\nTravels paid: " + IsPaid;
+            return  "\n<---Travel Entry Info--->" + "\nLast Country of Embarkation: " + LastCoutryOfEmbarkation + "\nEntry Mode: " + EntryMode + "\nEntry Date: " + EntryDate + "\nSHN End Date: " + ShnEndDate + "\nTravels paid: " + IsPaid;
         }
 
     }

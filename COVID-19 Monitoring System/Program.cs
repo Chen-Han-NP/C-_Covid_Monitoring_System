@@ -17,16 +17,8 @@ using Newtonsoft.Json;
 5) Assign/Replace TraceTogether Token
     3. create and assign a TraceTogetherToken object if resident has no existing (Collection location????)
 
-12) Create TravelEntry Record
-    1. prompt user for name
-    2. search for person
-    3. prompt user for details (last country of embarkation, entry mode)
-    4. create TravelEntry object
-    5. call CalculateSHNDuration() to calculate SHNEndDate based on criteria given
-    in the background brief
-    6. list SHN facilities if necessary, for user to select
-    7. assign chosen SHN facility if necessary, and reduce the vacancy count
-    8. call AddTravelEntry() in Person to assign the TravelEntry object
+12) Try except for DisplayVisitors list (the Facility name one);
+
 */
 
 
@@ -47,6 +39,7 @@ namespace COVID_19_Monitoring_System
             List<Visitor> visitorList = new List<Visitor>();
             List<Resident> residentList = new List<Resident>();
             List<String> serialNums = new List<String>();
+            List<SHNFacility> SHNList = GetSHNFacilityDetail();
 
             foreach (Person p in personList)
             {
@@ -74,7 +67,7 @@ namespace COVID_19_Monitoring_System
 
                 Console.Write("\n========COVID-19 Monitoring System========\n[1] Display all Visitors and Residents\n[2] List Person Details\n[3] Assign/Replace TraceTogether Token \n[4] Display all Business Locations " +
                     "\n[5] Edit Business Location Capacity\n[6] Display all SafeEntry records\n[7] Perform SafeEntry Check-In \n[8] Perform SafeEntry Check-out \n[9] Display all SHN facilities \n[10] Add Visitor" +
-                    "\n[0] Exit \nChoice: ");
+                    "\n[11] Create a new Travel Entry Record \n[0] Exit \nChoice: ");
                 string choice = Console.ReadLine();
 
                 if (choice == "0")
@@ -107,6 +100,15 @@ namespace COVID_19_Monitoring_System
                                 Console.WriteLine("Type: Visitor");
                                 Visitor v = (Visitor)p;
                                 Console.WriteLine(v.ToString());
+                                //For visitor who has a travelEntry
+                                foreach (TravelEntry te in v.TravelEntryList)
+                                {
+                                    Console.WriteLine(te.ToString());
+                                    if (te.ShnStay != null)
+                                    {
+                                        Console.WriteLine("Facility name: " + te.ShnStay.FacilityName);
+                                    }
+                                }
                             }
 
                             else if (p is Resident)
@@ -287,16 +289,14 @@ namespace COVID_19_Monitoring_System
 
                             // Check whether this person has any SafeEntry records.
                             if (p.SafeEntryList.Count <= 0)
-                            {
                                 Console.WriteLine("Person {0} does not have any SafeEntry record yet! ", p.Name);
-                            }
                             else
                             {
                                 bool isThereCheckedOut = false;
                                 List<Int32> recordNumList = new List<Int32>();
 
                                 //Check whether this person has any SafeEntry that has not been checked out yet.
-                                Console.WriteLine("<---SafeEntry Records for {0}--->", p.Name);
+                                Console.WriteLine("\n<---SafeEntry Records for {0}--->", p.Name);
 
                                 for (int i = 0; i < p.SafeEntryList.Count; i++)
                                 {
@@ -310,14 +310,11 @@ namespace COVID_19_Monitoring_System
                                         Console.WriteLine("{0, -20} {1, -20} {2, -20}", p.SafeEntryList[i].CheckIn, p.SafeEntryList[i].CheckOut, p.SafeEntryList[i].Location.BusinessName);
                                         Console.WriteLine();
 
-
-
                                     }
                                 }
+
                                 if (!isThereCheckedOut)
-                                {
                                     Console.WriteLine("Sorry, no SafeEntry record that has not been checked out yet!");
-                                }
                                 else
                                 {
                                     Console.Write("\nPlease enter which record to check-out: ");
@@ -333,31 +330,22 @@ namespace COVID_19_Monitoring_System
                                             Console.WriteLine("{0} has checked out from the {1}.", p.Name, p.SafeEntryList[result - 1].Location.BusinessName);
                                         }
                                         else
-                                        {
                                             Console.WriteLine("Please do not enter Record No that has already been checked out!");
-                                        }
 
                                     }
                                     else
-                                    {
                                         Console.WriteLine("No such record found! ");
-                                    }
                                 }
                             }
                         }
                     }
                     if (!personFound)
-                    {
                         Console.WriteLine("'{0}' not found. Please try again.", name);
-                    }
                 }
 
                 // Task 10
                 else if (choice == "9")
-                {
-                    List<SHNFacility> SHNList = GetSHNFacilityDetail();
                     DisplaySHNFacilities(SHNList);
-                }
 
                 //Task 11
                 else if (choice == "10")
@@ -372,6 +360,54 @@ namespace COVID_19_Monitoring_System
                     visitorList.Add(new Visitor(passport, nationality, name));
                     personList.Add(new Visitor(passport, nationality, name));
 
+                }
+
+                //Task 12
+                else if (choice == "11")
+                {
+                    Console.Write("Enter person name: ");
+                    string name = Console.ReadLine();
+                    bool personFound = false;
+
+                    foreach (Person p in personList)
+                    {
+                        if (p.Name == name)
+                        {
+                            personFound = true;
+                            Console.Write("Enter your last country of embarkation: ");
+                            string lastCountryTravelled = Console.ReadLine();
+                            Console.Write("Enter your entry mode(air/sea/land): ");
+                            string entryMode = Console.ReadLine();
+                            TravelEntry newTravelEntry = new TravelEntry(lastCountryTravelled, entryMode, DateTime.Now);
+                            newTravelEntry.CalculateSHNDuration();
+
+                            List<String> countriesList = new List<String> { "Vietnam", "New Zealand", "Macao SAR" };
+                            if (!countriesList.Contains(newTravelEntry.LastCoutryOfEmbarkation))
+                            {
+                                
+                                DisplaySHNFacilities(SHNList);
+                                Console.Write("Please select a SHNFacility from above: ");
+                                string fName = Console.ReadLine();
+                                bool shnFound = false;
+                                foreach (SHNFacility f in SHNList)
+                                {
+                                    if (fName == f.FacilityName)
+                                    {
+                                        shnFound = true;
+                                        newTravelEntry.ShnStay = f;
+                                        f.FacilityCapacity -= 1;
+                                    }
+                                }
+                                if (!shnFound)
+                                    Console.WriteLine("Facility name not found!");
+                            }
+
+                            p.AddTravelEntry(newTravelEntry);
+
+                        }
+                    }
+                    if (!personFound)
+                        Console.WriteLine("Person name not found!");
                 }
 
 
@@ -402,16 +438,14 @@ namespace COVID_19_Monitoring_System
 
                     List<SHNFacility> shnList = JsonConvert.DeserializeObject<List<SHNFacility>>(data);
                     return shnList;
-
                 }
                 else
                 {
                     return null;
                 }
             }
-
-
         }
+
 
         static void DisplaySHNFacilities(List<SHNFacility> fList)
         {
@@ -423,13 +457,13 @@ namespace COVID_19_Monitoring_System
             }
         }
 
+
         static void LoadPersonData(List<Person> pList)
         {
             using (StreamReader sr = new StreamReader("Person.csv"))
             {
                 string s = sr.ReadLine();
                 string[] headers = s.Split(',');
-
               /*  Console.WriteLine("Person.csv");
                 Console.WriteLine("{0, -8} {1, -8} {2, -20} {3, -16} {4, -11} {5, -12} {6, -11} {7, -25} {8, -15} {9, -25} {10, -15} {11, -16} {12, -16} {13, -20}",
                     headers[0], headers[1], headers[2], headers[3], headers[4], headers[5], headers[6],
@@ -447,7 +481,31 @@ namespace COVID_19_Monitoring_System
                     if (items[0] == "visitor")
                     {
                         Visitor visitor = new Visitor(items[4], items[5], items[1]);
+                        //Check whether the visitor has any TravelEntry
+                        if (items[9] != "")
+                        {
+                            TravelEntry te = new TravelEntry(items[9], items[10], DateTime.ParseExact(items[11], "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture));
+                            te.ShnEndDate = DateTime.ParseExact(items[12], "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                            te.IsPaid = Convert.ToBoolean(items[13]);
+
+                            //Check if theres facility name
+                            if (items[14] != "")
+                            {
+
+                                List<SHNFacility> fList = GetSHNFacilityDetail();
+                                foreach (SHNFacility f in fList)
+                                {
+                                    if (f.FacilityName == items[14])
+                                    {
+                                        te.AssignSHNFacility(f);
+                                    }
+                                }
+                            }
+                            visitor.TravelEntryList.Add(te);
+                        }
                         pList.Add(visitor);
+                        
+
 
                     }
 
@@ -526,11 +584,30 @@ namespace COVID_19_Monitoring_System
 
         static void DisplayVisitors(List<Visitor> vList)
         {
-            Console.WriteLine("\n\nVisitors");
-            Console.WriteLine("{0, -15} {1, -20} {2, -15}", "Name", "Passport No", "Nationality" );
+            Console.WriteLine("\n\nVisitors without TravelEntry");
+            Console.WriteLine("{0, -15} {1, -20} {2, -15}", "Name", "Passport No", "Nationality");
+
+
             foreach (Visitor v in vList)
             {
-                Console.WriteLine("{0, -15} {1, -20} {2, -15}", v.Name, v.PassportNo, v.Nationality);
+                 Console.WriteLine("{0, -15} {1, -20} {2, -15}", v.Name, v.PassportNo, v.Nationality);
+                   
+                
+            }
+            
+            Console.WriteLine("\nVisitors with TravelEntries");
+            foreach (Visitor v in vList)
+            {
+                if (v.TravelEntryList.Count > 0)
+                {
+                    Console.WriteLine("\nTravelEntry for {0}", v.Name);
+                    Console.WriteLine("{0,-17} {1, -10} {2, -22} {3, -22} {4, -14} {5, -15}", "TE Last Country", "TE Mode", "TravelEntry Date", "TravelSHN EndDate", "Travells Paid", "Facility Name");
+                    foreach (TravelEntry te in v.TravelEntryList)
+                    {
+                        //USE TRY CATCH FOR THIS
+                        Console.WriteLine("{0,-17} {1, -10} {2, -22} {3, -22} {4, -14} {5, -15}", te.LastCoutryOfEmbarkation, te.EntryMode, te.EntryDate, te.ShnEndDate, te.IsPaid, te.ShnStay.FacilityName);
+                    }
+                }
             }
         }
 
@@ -565,7 +642,7 @@ namespace COVID_19_Monitoring_System
         {
             bool isEmpty = true;
 
-            Console.WriteLine("<---SafeEntry Records for everyone--->");
+            Console.WriteLine("\n<---SafeEntry Records for everyone--->");
             foreach (Person p in pList)
             {
                 if (p.SafeEntryList.Count > 0)
