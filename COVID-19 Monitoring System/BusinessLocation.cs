@@ -58,11 +58,12 @@ namespace COVID_19_Monitoring_System
             BusinessName = bn;
             BranchCode = bc;
             MaximumCapacity = mc;
+            VisitorsNow = 0;
         }
 
         public bool isFull()
         {
-            if (MaximumCapacity >= VisitorsNow)
+            if (VisitorsNow >= MaximumCapacity)
             {
                 return true;
             }

@@ -17,11 +17,6 @@ using Newtonsoft.Json;
 5) Assign/Replace TraceTogether Token
     3. create and assign a TraceTogetherToken object if resident has no existing (Collection location????)
 
-
-7) Edit Business Location Capacity
-    1. prompt user to enter details
-    2. search for business location
-    3. prompt user to edit maximum capacity
 8) SafeEntry Check-in
     1. prompt user for name
     2. search for person
@@ -76,7 +71,7 @@ namespace COVID_19_Monitoring_System
             {
 
                 Console.Write("\n========COVID-19 Monitoring System========\n[1] List all Visitors and Residents\n[2] List Person Details\n[3] Assign/Replace TraceTogether Token \n[4] List all Business Locations "+
-                    "\n[5] Edit Business Location Capacity\n[0] Exit \nChoice: ");
+                    "\n[5] Edit Business Location Capacity\n[6] SafeEntry Check-In \n[0] Exit \nChoice: ");
                 string choice = Console.ReadLine();
 
                 if (choice == "0")
@@ -214,7 +209,64 @@ namespace COVID_19_Monitoring_System
                     
                 }
 
+                //Task 8
+                else if (choice == "6")
+                {
+                    Console.Write("Enter person name: ");
+                    string name = Console.ReadLine();
+                    bool personFound = false;
+                    bool businessFound = false;
 
+                    foreach (Person p in personList)
+                    {
+                        if(p.Name == name)
+                        {
+                            while (true) 
+                            {
+                                personFound = true;
+                                Console.WriteLine("{0} found!", p.Name);
+                                DisplayBusinessLocation(businessList);
+                                Console.Write("Please select a Business Location to check-in: ");
+                                string bName = Console.ReadLine();
+                                foreach (BusinessLocation b in businessList)
+                                {
+                                    if (b.BusinessName == bName)
+                                    {
+                                        businessFound = true;
+                                        if (!b.isFull())
+                                        {
+                                            DateTime dt = new DateTime();
+                                            SafeEntry se = new SafeEntry(DateTime.Now, dt, b);
+
+                                            p.AddSafeEntry(se);
+                                            b.VisitorsNow += 1;
+                                            Console.WriteLine("{0} has checked in to the {1}.", p.Name, b.BusinessName);
+                                            break;
+
+                                        }
+                                        else
+                                        {
+                                            Console.WriteLine("{0} is at Max Capacity.", bName);
+                                        }
+                                    }
+                                }
+                                if (!businessFound)
+                                    Console.WriteLine("'{0}' not found. Please try again.", bName);
+                                else
+                                    break;
+                                
+                            }
+                           
+                        }
+
+                    }
+                    if (!personFound)
+                    {
+                        Console.WriteLine("'{0}' not found. Please try again.", name);
+                    }
+
+
+                }
 
 
 
