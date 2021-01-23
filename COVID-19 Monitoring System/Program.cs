@@ -17,12 +17,16 @@ using Newtonsoft.Json;
 5) Assign/Replace TraceTogether Token
     3. create and assign a TraceTogetherToken object if resident has no existing (Collection location????)
 
-9) SafeEntry Check-out
-1. prompt user for name
-2. search for person
-3. list SafeEntry records for that person that have not been checked-out
-4. prompt user to select record to check-out
-5. call PerformCheckOut() to check-out, and reduce visitorsNow by 1
+12) Create TravelEntry Record
+    1. prompt user for name
+    2. search for person
+    3. prompt user for details (last country of embarkation, entry mode)
+    4. create TravelEntry object
+    5. call CalculateSHNDuration() to calculate SHNEndDate based on criteria given
+    in the background brief
+    6. list SHN facilities if necessary, for user to select
+    7. assign chosen SHN facility if necessary, and reduce the vacancy count
+    8. call AddTravelEntry() in Person to assign the TravelEntry object
 */
 
 
@@ -69,7 +73,7 @@ namespace COVID_19_Monitoring_System
             {
 
                 Console.Write("\n========COVID-19 Monitoring System========\n[1] Display all Visitors and Residents\n[2] List Person Details\n[3] Assign/Replace TraceTogether Token \n[4] Display all Business Locations " +
-                    "\n[5] Edit Business Location Capacity\n[6] Display all SafeEntry records\n[7] Perform SafeEntry Check-In \n[8] Perform SafeEntry Check-out \n[9] Display all SHN facilities" +
+                    "\n[5] Edit Business Location Capacity\n[6] Display all SafeEntry records\n[7] Perform SafeEntry Check-In \n[8] Perform SafeEntry Check-out \n[9] Display all SHN facilities \n[10] Add Visitor" +
                     "\n[0] Exit \nChoice: ");
                 string choice = Console.ReadLine();
 
@@ -354,6 +358,23 @@ namespace COVID_19_Monitoring_System
                     List<SHNFacility> SHNList = GetSHNFacilityDetail();
                     DisplaySHNFacilities(SHNList);
                 }
+
+                //Task 11
+                else if (choice == "10")
+                {
+                    Console.Write("Name: ");
+                    string name = Console.ReadLine();
+                    Console.Write("Passport No.: ");
+                    string passport = Console.ReadLine();
+                    Console.Write("Nationality: ");
+                    string nationality = Console.ReadLine();
+
+                    visitorList.Add(new Visitor(passport, nationality, name));
+                    personList.Add(new Visitor(passport, nationality, name));
+
+                }
+
+
 
             }
 
