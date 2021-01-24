@@ -33,14 +33,16 @@ namespace COVID_19_Monitoring_System
             List<Person> personList = new List<Person>();
             List<BusinessLocation> businessList = new List<BusinessLocation>();
 
-            LoadPersonData(personList);
+            List<SHNFacility> SHNList = GetSHNFacilityDetail();
+            LoadPersonData(personList, SHNList);
             LoadBusinessLocation(businessList);
+
 
             //Task 3 
             List<Visitor> visitorList = new List<Visitor>();
             List<Resident> residentList = new List<Resident>();
             List<String> serialNums = new List<String>();
-            List<SHNFacility> SHNList = GetSHNFacilityDetail();
+            
 
             foreach (Person p in personList)
             {
@@ -373,17 +375,15 @@ namespace COVID_19_Monitoring_System
                                 {
                                     if (f.IsAvailable())
                                     {
+                                        shnFound = true;
                                         newTravelEntry.AssignSHNFacility(f);
                                         f.FacilityVacancy -= 1;
-                                    }
-                                    else
-                                    {
-                                        Console.WriteLine("There is no vacant slots in facility {0}", f.FacilityName);
+                                        Console.WriteLine("{0} is available! {1} has checked in.", f.FacilityName, p.Name);
                                     }
                                 }
                             }
                             if (!shnFound)
-                                Console.WriteLine("Facility name not found!");
+                                Console.WriteLine("There is no vacant slots or the Facility name is not found!");
                         }
 
                         p.AddTravelEntry(newTravelEntry);
@@ -414,6 +414,10 @@ namespace COVID_19_Monitoring_System
                     string data = readTask.Result;
 
                     List<SHNFacility> shnList = JsonConvert.DeserializeObject<List<SHNFacility>>(data);
+                    foreach (SHNFacility f in shnList)
+                    {
+                        f.FacilityVacancy = f.FacilityCapacity;
+                    }
                     return shnList;
                 }
                 else
@@ -437,24 +441,19 @@ namespace COVID_19_Monitoring_System
         //This method takes in person name and the personList, return either the index of the Person in the list OR a -1 value means that its not found.
         static int FindPerson(string n, List<Person> pList)
         {
-            bool personFound = false;
             for (int i = 0; i < pList.Count; i++)
             {
                 if (pList[i].Name == n)
                 {
-                    personFound = true;
                     return i;
                 }
             }
-            if (!personFound)
-            {
-                return -1;
-            }
+            return -1;
         }
 
         
 
-        static void LoadPersonData(List<Person> pList)
+        static void LoadPersonData(List<Person> pList, List<SHNFacility> fList)
         {
             using (StreamReader sr = new StreamReader("Person.csv"))
             {
@@ -488,7 +487,6 @@ namespace COVID_19_Monitoring_System
                             if (items[14] != "")
                             {
 
-                                List<SHNFacility> fList = GetSHNFacilityDetail();
                                 foreach (SHNFacility f in fList)
                                 {
                                     //If the Visitor has a facility name 
@@ -528,8 +526,7 @@ namespace COVID_19_Monitoring_System
                             //Check if theres facility name
                             if (items[14] != "")
                             {
-
-                                List<SHNFacility> fList = GetSHNFacilityDetail();
+                                
                                 foreach (SHNFacility f in fList)
                                 {
                                     if (f.FacilityName == items[14])

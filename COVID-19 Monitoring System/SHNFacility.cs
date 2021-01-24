@@ -70,7 +70,6 @@ namespace COVID_19_Monitoring_System
         {
             FacilityName = fn;
             FacilityCapacity = fc;
-            FacilityVacancy = FacilityCapacity;
             DistFromAirCheckpoint = ac;
             DistFromSeaCheckpoint = sc;
             DistFromLandCheckpoint = lc;
