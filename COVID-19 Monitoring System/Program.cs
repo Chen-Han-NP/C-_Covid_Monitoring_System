@@ -19,7 +19,18 @@ using Newtonsoft.Json;
 //Duplicated name????? Do we need to check for the same name exist in the list
 
 12) Try except for DisplayVisitors list (the Facility name one);
-13) 
+13) Calculate SHN Charges
+    1. prompt user for name
+    2. search for person
+    3. retrieve TravelEntry with SHN ended and is unpaid
+    4. call CalculateSHNCharges() to calculate the charges based on the criteria
+    provided in the background brief
+        i. if visitor stayed at SDF, call CalculateTravelCost(string,DateTime) to
+        calculate transportation fare. [the input parameters are entryMode
+        and entryDate]
+        ii. Note: To add 7% GST
+    5. prompt to make payment
+    6. change the isPaid Boolean value
 */
 
 
@@ -37,6 +48,7 @@ namespace COVID_19_Monitoring_System
             LoadPersonData(personList, SHNList);
             LoadBusinessLocation(businessList);
 
+            
 
             //Task 3 
             List<Visitor> visitorList = new List<Visitor>();
@@ -61,7 +73,7 @@ namespace COVID_19_Monitoring_System
             {
                 Console.Write("\n========COVID-19 Monitoring System========\n[1] Display all Visitors and Residents\n[2] List Person Details\n[3] Assign/Replace TraceTogether Token \n[4] Display all Business Locations " +
                     "\n[5] Edit Business Location Capacity\n[6] Display all SafeEntry records\n[7] Perform SafeEntry Check-In \n[8] Perform SafeEntry Check-out \n[9] Display all SHN facilities \n[10] Add Visitor" +
-                    "\n[11] Create a new Travel Entry Record \n[0] Exit \nChoice: ");
+                    "\n[11] Create a new Travel Entry Record \n[12] Calculate SHN Charges \n[0] Exit \nChoice: ");
                 string choice = Console.ReadLine();
 
 
@@ -156,7 +168,7 @@ namespace COVID_19_Monitoring_System
                                 String newSerialNo = GetRandomSerialNo(serialNums);
                                 serialNums.Add(newSerialNo);
 
-//!!!!!!!!!!!!!!!//ASK CHER
+                                //!!!!!!!!!!!!!!!//ASK CHER
                                 string newCL = "(idk)";
                                 DateTime newExpiryDate = currentDate.AddMonths(6);
                                 TraceTogetherToken token = new TraceTogetherToken(newSerialNo, newCL, newExpiryDate);
@@ -217,7 +229,7 @@ namespace COVID_19_Monitoring_System
                     Console.Write("Enter person name: ");
                     string name = Console.ReadLine();
                     int personIndex = FindPerson(name, personList);
-                    
+
                     if (personIndex == -1)
                         Console.WriteLine("Invalid input or the Person name is not found!");
                     else
@@ -323,13 +335,13 @@ namespace COVID_19_Monitoring_System
                 /*-----------------Task 10---------------------*/
                 else if (choice == "9")
                     DisplaySHNFacilities(SHNList);
-                
+
 
 
                 /*-----------------Task 11---------------------*/
                 else if (choice == "10")
                 {
-//Duplicated name????? Do we need to check for the same name exist in the list
+                    //Duplicated name????? Do we need to check for the same name exist in the list
                     Console.Write("Name: ");
                     string name = Console.ReadLine();
                     Console.Write("Passport No.: ");
@@ -388,6 +400,22 @@ namespace COVID_19_Monitoring_System
 
                         p.AddTravelEntry(newTravelEntry);
                     }
+                }
+
+                else if (choice == "12")
+                {
+                    Console.Write("Enter person name: ");
+                    string name = Console.ReadLine();
+                    int personIndex = FindPerson(name, personList);
+                    if (personIndex == -1)
+                        Console.WriteLine("Invalid input or Person name is not found!");
+                    else
+                    {
+                        Person p = personList[personIndex];
+                        double amountToPay = p.CalculateSHNCharges();
+                        Console.WriteLine(amountToPay);
+                    }
+
                 }
             }
         }

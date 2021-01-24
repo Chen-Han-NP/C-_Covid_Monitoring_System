@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-//CalculateTravelCost()
+
 namespace COVID_19_Monitoring_System
 {
     class SHNFacility
@@ -79,10 +79,29 @@ namespace COVID_19_Monitoring_System
         //Add TravelEntry into CalculaeTravelCost
         public double CalculateTravelCost(string em, DateTime ed)
         {
-            TravelEntry te = new TravelEntry();
-            te.EntryMode = em;
-            te.EntryDate = ed;
-            return 0;
+            double baseFare = 0;
+            double totalCost = 0;
+            if (em == "Land")
+                baseFare = 50 + (DistFromLandCheckpoint * 0.22);
+            else if (em == "Air")
+                baseFare = 50 + (DistFromAirCheckpoint * 0.22);
+            else if (em == "Sea")
+                baseFare = 50 + (DistFromSeaCheckpoint * 0.22);
+            else
+                Console.WriteLine("{0} not found!", em);
+
+
+
+            TimeSpan timeofDay = ed.TimeOfDay;
+            int hours = timeofDay.Hours;
+            if ((hours >= 6 && hours < 9) || (hours >= 18 && hours < 24))
+                totalCost = baseFare * 1.25;
+            else if (hours >= 0 && hours < 6)
+                totalCost = baseFare * 1.50;
+            else
+                totalCost = baseFare;
+
+            return totalCost;
         }
 
         public bool IsAvailable()

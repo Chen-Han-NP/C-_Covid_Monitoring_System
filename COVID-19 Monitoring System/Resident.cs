@@ -45,7 +45,27 @@ namespace COVID_19_Monitoring_System
 
         public override double CalculateSHNCharges()
         {
-            return 0;
+            double totalCost = 0;
+            foreach (TravelEntry te in TravelEntryList)
+            {
+                if (te.ShnEndDate <= DateTime.Now && !te.IsPaid)
+                {
+                    if (te.LastCoutryOfEmbarkation == "New Zealand" || te.LastCoutryOfEmbarkation == "Vietnam")
+                    {
+                        totalCost = 200 * 1.07;
+                    }
+                    else if (te.LastCoutryOfEmbarkation == "Macao SAR")
+                    {
+                        totalCost = (200 + 20) * 1.07;
+                    }
+                    else
+                    {
+                        totalCost = (200 + 20 + 1000) * 1.07;
+                    }
+                }
+
+            }
+            return totalCost;
         }
 
         public override string ToString()
