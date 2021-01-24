@@ -403,7 +403,21 @@ namespace COVID_19_Monitoring_System
                     {
                         Person p = personList[personIndex];
                         double amountToPay = p.CalculateSHNCharges();
-                        Console.WriteLine(amountToPay);
+                        if (amountToPay > 0)
+                        {
+                            Console.WriteLine("Total amount to pay: ${0}.", amountToPay.ToString("#0.00"));
+                            Console.Write("Make payment now? (Y/N): ");
+                            string payNow = Console.ReadLine();
+                            if (payNow == "Y")
+                            {
+                                p.TravelEntryList[0].IsPaid = true;
+                                Console.WriteLine("Payment successful.");
+                            }
+                            else if (payNow == "N")
+                            {
+                                Console.WriteLine("Payment not made.");
+                            }
+                        }
                     }
 
                 }

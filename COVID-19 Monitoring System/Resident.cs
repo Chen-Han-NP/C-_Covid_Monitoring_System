@@ -48,7 +48,17 @@ namespace COVID_19_Monitoring_System
             double totalCost = 0;
             foreach (TravelEntry te in TravelEntryList)
             {
-                if (te.ShnEndDate <= DateTime.Now && !te.IsPaid)
+                if (te.ShnEndDate > DateTime.Now)
+                {
+                    Console.WriteLine("Your stay has not ended yet!");
+                    return -1;
+                }
+                else if (te.IsPaid)
+                {
+                    Console.WriteLine("You have paid your SHN charges!");
+                    return -1;
+                }
+                else if (te.ShnEndDate <= DateTime.Now && !te.IsPaid)
                 {
                     if (te.LastCoutryOfEmbarkation == "New Zealand" || te.LastCoutryOfEmbarkation == "Vietnam")
                     {
