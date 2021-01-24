@@ -19,18 +19,8 @@ using Newtonsoft.Json;
 //Duplicated name????? Do we need to check for the same name exist in the list
 
 12) Try except for DisplayVisitors list (the Facility name one);
-13) Calculate SHN Charges
-    1. prompt user for name
-    2. search for person
-    3. retrieve TravelEntry with SHN ended and is unpaid
-    4. call CalculateSHNCharges() to calculate the charges based on the criteria
-    provided in the background brief
-        i. if visitor stayed at SDF, call CalculateTravelCost(string,DateTime) to
-        calculate transportation fare. [the input parameters are entryMode
-        and entryDate]
-        ii. Note: To add 7% GST
-    5. prompt to make payment
-    6. change the isPaid Boolean value
+
+Update UI for choice 1, need to add Resident details and Residents with Travel records
 */
 
 
