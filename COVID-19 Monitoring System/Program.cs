@@ -16,9 +16,10 @@ using Newtonsoft.Json;
 
 5) Assign/Replace TraceTogether Token
     3. create and assign a TraceTogetherToken object if resident has no existing (Collection location????)
+//Duplicated name????? Do we need to check for the same name exist in the list
 
 12) Try except for DisplayVisitors list (the Facility name one);
-
+13) 
 */
 
 
@@ -43,99 +44,85 @@ namespace COVID_19_Monitoring_System
 
             foreach (Person p in personList)
             {
-                if (p is Visitor)
-                {
-                    Visitor v = (Visitor)p;
+                if (p is Visitor v)
                     visitorList.Add(v);
-                }
-                else if (p is Resident)
+                else if (p is Resident r)
                 {
-                    Resident r = (Resident)p;
                     residentList.Add(r);
                     if (r.Token != null)
-                    {
                         serialNums.Add(r.Token.SerialNo);
-                        
-                    }
                 }
             }
 
 
-
             while (true)
             {
-
                 Console.Write("\n========COVID-19 Monitoring System========\n[1] Display all Visitors and Residents\n[2] List Person Details\n[3] Assign/Replace TraceTogether Token \n[4] Display all Business Locations " +
                     "\n[5] Edit Business Location Capacity\n[6] Display all SafeEntry records\n[7] Perform SafeEntry Check-In \n[8] Perform SafeEntry Check-out \n[9] Display all SHN facilities \n[10] Add Visitor" +
                     "\n[11] Create a new Travel Entry Record \n[0] Exit \nChoice: ");
                 string choice = Console.ReadLine();
 
-                if (choice == "0")
-                {
-                    break;
-                }
 
-                //Task 3
+                if (choice == "0")
+                    break;
+
+
+                /*-----------------Task 3---------------------*/
                 else if (choice == "1")
                 {
                     DisplayVisitors(visitorList);
                     DisplayResidents(residentList);
                 }
 
+
+
+                //DO EXCEPTION HANDLING
+                /*-----------------Task 4---------------------*/
                 else if (choice == "2")
                 {
-                    //DO EXCEPTION HANDLING
-                    //Task 4.1
-
                     Console.Write("\nEnter person name: ");
                     string name = Console.ReadLine();
-
-                    //Task 4.2
-                    foreach (Person p in personList)
+                    //Get the PersonIndex from the method
+                    int personIndex = FindPerson(name, personList);
+                    if (personIndex == -1)
+                        Console.WriteLine("Invalid input or the Person name is not found!");
+                    else
                     {
-                        if (p.Name == name)
+                        Person p = personList[personIndex];
+                        if (p is Visitor visitor)
                         {
-                            if (p is Visitor)
+                            Console.WriteLine("Type: Visitor");
+                            Console.WriteLine(visitor.ToString());
+
+                            //For visitor who has a travelEntry
+                            foreach (TravelEntry te in visitor.TravelEntryList)
                             {
-                                Console.WriteLine("Type: Visitor");
-                                Visitor v = (Visitor)p;
-                                Console.WriteLine(v.ToString());
-                                //For visitor who has a travelEntry
-                                foreach (TravelEntry te in v.TravelEntryList)
-                                {
-                                    Console.WriteLine(te.ToString());
-                                    if (te.ShnStay != null)
-                                    {
-                                        Console.WriteLine("Facility name: " + te.ShnStay.FacilityName);
-                                    }
-                                }
+                                Console.WriteLine(te.ToString());
+                                if (te.ShnStay != null)
+                                    Console.WriteLine("Facility name: " + te.ShnStay.FacilityName);
                             }
+                        }
+                        else if (p is Resident resident)
+                        {
+                            Console.WriteLine("Type: Resident");
+                            Console.WriteLine(resident.ToString());
+                            if (resident.Token != null)
+                                Console.WriteLine(resident.Token.ToString());
 
-                            else if (p is Resident)
+                            //For resident who has a travelEntry
+                            foreach (TravelEntry te in resident.TravelEntryList)
                             {
-                                Console.WriteLine("Type: Resident");
-                                Resident r = (Resident)p;
-                                Console.WriteLine(r.ToString());
-                                if (r.Token != null)
-                                {
-                                    Console.WriteLine(r.Token.ToString());
-                                }
-
-                                //For resident who has a travelEntry
-                                foreach (TravelEntry te in r.TravelEntryList)
-                                {
-                                    Console.WriteLine(te.ToString());
-                                    if (te.ShnStay != null)
-                                    {
-                                        Console.WriteLine("Facility name: " + te.ShnStay.FacilityName);
-                                    }
-                                }
+                                Console.WriteLine(te.ToString());
+                                if (te.ShnStay != null)
+                                    Console.WriteLine("Facility name: " + te.ShnStay.FacilityName);
                             }
                         }
                     }
                 }
 
-                //Task 5
+
+
+                /*-----------------Task 5---------------------*/
                 else if (choice == "3")
                 {
                     Console.Write("\nEnter resident name: ");
@@ -167,7 +154,7 @@ namespace COVID_19_Monitoring_System
                                 String newSerialNo = GetRandomSerialNo(serialNums);
                                 serialNums.Add(newSerialNo);
 
-                                //ASK CHER
+//!!!!!!!!!!!!!!!//ASK CHER
                                 string newCL = "(idk)";
                                 DateTime newExpiryDate = currentDate.AddMonths(6);
                                 TraceTogetherToken token = new TraceTogetherToken(newSerialNo, newCL, newExpiryDate);
@@ -178,16 +165,18 @@ namespace COVID_19_Monitoring_System
                             }
                         }
                     }
-
                 }
 
-                //Task 6
+
+
+                /*-----------------Task 6---------------------*/
                 else if (choice == "4")
-                {
                     DisplayBusinessLocation(businessList);
-                }
 
-                //Task 7
+
+
+
+                /*-----------------Task 7---------------------*/
                 else if (choice == "5")
                 {
                     bool found = false;
@@ -208,148 +197,137 @@ namespace COVID_19_Monitoring_System
                         }
                     }
                     if (!found)
-                    {
-                        Console.WriteLine("Not found!");
-                    }
-
+                        Console.WriteLine("Invalid input or the Business name is not found!");
                 }
+
+
 
                 else if (choice == "6")
                 {
                     DisplaySafeEntryRecords(personList);
                 }
 
-                //Task 8
+
+
+                /*-----------------Task 8---------------------*/
                 else if (choice == "7")
                 {
                     Console.Write("Enter person name: ");
                     string name = Console.ReadLine();
-                    bool personFound = false;
-                    bool businessFound = false;
-
-                    foreach (Person p in personList)
+                    int personIndex = FindPerson(name, personList);
+                    
+                    if (personIndex == -1)
+                        Console.WriteLine("Invalid input or the Person name is not found!");
+                    else
                     {
-                        if (p.Name == name)
+                        Person p = personList[personIndex];
+                        bool businessFound = false;
+                        while (true)
                         {
-                            while (true)
+                            Console.WriteLine("{0} found!", p.Name);
+                            DisplayBusinessLocation(businessList);
+                            Console.Write("Please select a Business Location to check-in: ");
+                            string bName = Console.ReadLine();
+                            foreach (BusinessLocation b in businessList)
                             {
-                                personFound = true;
-                                Console.WriteLine("{0} found!", p.Name);
-                                DisplayBusinessLocation(businessList);
-                                Console.Write("Please select a Business Location to check-in: ");
-                                string bName = Console.ReadLine();
-                                foreach (BusinessLocation b in businessList)
+                                if (b.BusinessName == bName)
                                 {
-                                    if (b.BusinessName == bName)
+                                    businessFound = true;
+                                    if (!b.isFull())
                                     {
-                                        businessFound = true;
-                                        if (!b.isFull())
-                                        {
-                                            DateTime dt = new DateTime();
-                                            SafeEntry se = new SafeEntry(DateTime.Now, dt, b);
+                                        DateTime dt = new DateTime();
+                                        SafeEntry se = new SafeEntry(DateTime.Now, dt, b);
 
-                                            p.AddSafeEntry(se);
-                                            b.VisitorsNow += 1;
-                                            Console.WriteLine("{0} has checked in to the {1}.", p.Name, b.BusinessName);
-                                            break;
-
-                                        }
-                                        else
-                                        {
-                                            Console.WriteLine("{0} is at Max Capacity.", bName);
-                                        }
+                                        p.AddSafeEntry(se);
+                                        b.VisitorsNow += 1;
+                                        Console.WriteLine("{0} has checked in to the {1}.", p.Name, b.BusinessName);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("{0} is at Max Capacity.", bName);
                                     }
                                 }
-                                if (!businessFound)
-                                    Console.WriteLine("'{0}' not found. Please try again.", bName);
-                                else
-                                    break;
                             }
+                            if (!businessFound)
+                                Console.WriteLine("'{0}' not found. Please try again.", bName);
+                            else
+                                break;
                         }
-                    }
-                    if (!personFound)
-                    {
-                        Console.WriteLine("'{0}' not found. Please try again.", name);
                     }
                 }
 
 
-                // Task 9
+                /*-----------------Task 9---------------------*/
                 else if (choice == "8")
                 {
                     Console.Write("Enter person name: ");
                     string name = Console.ReadLine();
-                    bool personFound = false;
-
-                    foreach (Person p in personList)
+                    int personIndex = FindPerson(name, personList);
+                    if (personIndex == -1)
+                        Console.WriteLine("Invalid input or the Person name is not found!");
+                    else
                     {
-                        if (p.Name == name)
+                        bool isThereCheckedOut = false;
+                        Person p = personList[personIndex];
+                        List<Int32> recordNumList = new List<Int32>();
+
+                        //Check whether this person has any SafeEntry that has not been checked out yet.
+                        Console.WriteLine("\n<---SafeEntry Records for {0}--->", p.Name);
+
+                        for (int i = 0; i < p.SafeEntryList.Count; i++)
                         {
-                            personFound = true;
-
-                            // Check whether this person has any SafeEntry records.
-                            if (p.SafeEntryList.Count <= 0)
-                                Console.WriteLine("Person {0} does not have any SafeEntry record yet! ", p.Name);
-                            else
+                            DateTime dt = new DateTime();
+                            if (p.SafeEntryList[i].CheckOut == dt)
                             {
-                                bool isThereCheckedOut = false;
-                                List<Int32> recordNumList = new List<Int32>();
+                                isThereCheckedOut = true;
+                                recordNumList.Add(i + 1);
+                                Console.WriteLine("Record No: {0}", i + 1);
+                                Console.WriteLine("{0, -20} {1, -20} {2, -20}", "Check-In", "Check-Out", "Business Location");
+                                Console.WriteLine("{0, -20} {1, -20} {2, -20}", p.SafeEntryList[i].CheckIn, p.SafeEntryList[i].CheckOut, p.SafeEntryList[i].Location.BusinessName);
+                                Console.WriteLine();
 
-                                //Check whether this person has any SafeEntry that has not been checked out yet.
-                                Console.WriteLine("\n<---SafeEntry Records for {0}--->", p.Name);
-
-                                for (int i = 0; i < p.SafeEntryList.Count; i++)
-                                {
-                                    DateTime dt = new DateTime();
-                                    if (p.SafeEntryList[i].CheckOut == dt)
-                                    {
-                                        isThereCheckedOut = true;
-                                        recordNumList.Add(i + 1);
-                                        Console.WriteLine("Record No: {0}", i + 1);
-                                        Console.WriteLine("{0, -20} {1, -20} {2, -20}", "Check-In", "Check-Out", "Business Location");
-                                        Console.WriteLine("{0, -20} {1, -20} {2, -20}", p.SafeEntryList[i].CheckIn, p.SafeEntryList[i].CheckOut, p.SafeEntryList[i].Location.BusinessName);
-                                        Console.WriteLine();
-
-                                    }
-                                }
-
-                                if (!isThereCheckedOut)
-                                    Console.WriteLine("Sorry, no SafeEntry record that has not been checked out yet!");
-                                else
-                                {
-                                    Console.Write("\nPlease enter which record to check-out: ");
-                                    //EXCEPTION HANDLING
-                                    int result = Convert.ToInt32(Console.ReadLine());
-                                    //Check whether the number has exceeded the size of the SafeEntryList
-                                    if (result <= p.SafeEntryList.Count)
-                                    {
-                                        //Now check whether the user has entered the correct Record No given in the list above.
-                                        if (recordNumList.Contains(result))
-                                        {
-                                            p.SafeEntryList[result - 1].PerformCheckOut();
-                                            Console.WriteLine("{0} has checked out from the {1}.", p.Name, p.SafeEntryList[result - 1].Location.BusinessName);
-                                        }
-                                        else
-                                            Console.WriteLine("Please do not enter Record No that has already been checked out!");
-
-                                    }
-                                    else
-                                        Console.WriteLine("No such record found! ");
-                                }
                             }
                         }
+
+                        if (!isThereCheckedOut)
+                            Console.WriteLine("Sorry, no SafeEntry record that has not been checked out yet!");
+                        else
+                        {
+                            Console.Write("\nPlease enter which record to check-out: ");
+                            //EXCEPTION HANDLING
+                            int result = Convert.ToInt32(Console.ReadLine());
+                            //Check whether the number has exceeded the size of the SafeEntryList
+                            if (result <= p.SafeEntryList.Count)
+                            {
+                                //Now check whether the user has entered the correct Record No given in the list above.
+                                if (recordNumList.Contains(result))
+                                {
+                                    p.SafeEntryList[result - 1].PerformCheckOut();
+                                    Console.WriteLine("{0} has checked out from the {1}.", p.Name, p.SafeEntryList[result - 1].Location.BusinessName);
+                                }
+                                else
+                                    Console.WriteLine("Please do not enter Record No that has already been checked out!");
+
+                            }
+                            else
+                                Console.WriteLine("No such record found! ");
+                        }
                     }
-                    if (!personFound)
-                        Console.WriteLine("'{0}' not found. Please try again.", name);
+
                 }
 
-                // Task 10
+
+                /*-----------------Task 10---------------------*/
                 else if (choice == "9")
                     DisplaySHNFacilities(SHNList);
+                
 
-                //Task 11
+
+                /*-----------------Task 11---------------------*/
                 else if (choice == "10")
                 {
+//Duplicated name????? Do we need to check for the same name exist in the list
                     Console.Write("Name: ");
                     string name = Console.ReadLine();
                     Console.Write("Passport No.: ");
@@ -362,59 +340,58 @@ namespace COVID_19_Monitoring_System
 
                 }
 
-                //Task 12
+
+                /*-----------------Task 12---------------------*/
                 else if (choice == "11")
                 {
                     Console.Write("Enter person name: ");
                     string name = Console.ReadLine();
-                    bool personFound = false;
-
-                    foreach (Person p in personList)
+                    int personIndex = FindPerson(name, personList);
+                    if (personIndex == -1)
+                        Console.WriteLine("Invalid input or Person name is not found!");
+                    else
                     {
-                        if (p.Name == name)
-                        {
-                            personFound = true;
-                            Console.Write("Enter your last country of embarkation: ");
-                            string lastCountryTravelled = Console.ReadLine();
-                            Console.Write("Enter your entry mode(air/sea/land): ");
-                            string entryMode = Console.ReadLine();
-                            TravelEntry newTravelEntry = new TravelEntry(lastCountryTravelled, entryMode, DateTime.Now);
-                            newTravelEntry.CalculateSHNDuration();
+                        Person p = personList[personIndex];
+                        Console.Write("Enter your last country of embarkation: ");
+                        string lastCountryTravelled = Console.ReadLine();
+                        Console.Write("Enter your entry mode(Air/Sea/Land): ");
+                        string entryMode = Console.ReadLine();
+                        TravelEntry newTravelEntry = new TravelEntry(lastCountryTravelled, entryMode, DateTime.Now);
+                        newTravelEntry.CalculateSHNDuration();
 
-                            List<String> countriesList = new List<String> { "Vietnam", "New Zealand", "Macao SAR" };
-                            if (!countriesList.Contains(newTravelEntry.LastCoutryOfEmbarkation))
+                        List<String> countriesList = new List<String> { "Vietnam", "New Zealand", "Macao SAR" };
+                        if (!countriesList.Contains(newTravelEntry.LastCoutryOfEmbarkation))
+                        {
+
+                            DisplaySHNFacilities(SHNList);
+                            Console.Write("Please select a SHNFacility from above: ");
+                            string fName = Console.ReadLine();
+                            bool shnFound = false;
+                            foreach (SHNFacility f in SHNList)
                             {
-                                
-                                DisplaySHNFacilities(SHNList);
-                                Console.Write("Please select a SHNFacility from above: ");
-                                string fName = Console.ReadLine();
-                                bool shnFound = false;
-                                foreach (SHNFacility f in SHNList)
+                                if (fName == f.FacilityName)
                                 {
-                                    if (fName == f.FacilityName)
+                                    if (f.IsAvailable())
                                     {
-                                        shnFound = true;
-                                        newTravelEntry.ShnStay = f;
-                                        f.FacilityCapacity -= 1;
+                                        newTravelEntry.AssignSHNFacility(f);
+                                        f.FacilityVacancy -= 1;
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("There is no vacant slots in facility {0}", f.FacilityName);
                                     }
                                 }
-                                if (!shnFound)
-                                    Console.WriteLine("Facility name not found!");
                             }
-
-                            p.AddTravelEntry(newTravelEntry);
-
+                            if (!shnFound)
+                                Console.WriteLine("Facility name not found!");
                         }
+
+                        p.AddTravelEntry(newTravelEntry);
                     }
-                    if (!personFound)
-                        Console.WriteLine("Person name not found!");
                 }
-
-
-
             }
-
         }
+
 
 
 
@@ -446,17 +423,36 @@ namespace COVID_19_Monitoring_System
             }
         }
 
-
+        //Display the SHN Facilities
         static void DisplaySHNFacilities(List<SHNFacility> fList)
         {
             Console.WriteLine("\nSHN Facilities");
-            Console.WriteLine("{0, -20}{1, -20}{2, -25}{3, -25}{4, -27}", "Facility Name", "Facility Capacity", "Dist from air checkpoint", "Dist from sea checkpoint", "Dist from land checkpoint");
+            Console.WriteLine("{0, -20}{1, -20}{2, -20}{3, -25}{4, -25}{5, -27}", "Facility Name", "Facility Capacity", "Facility Vacancy", "Dist from air checkpoint", "Dist from sea checkpoint", "Dist from land checkpoint");
             foreach(SHNFacility f in fList)
             {
-                Console.WriteLine("{0, -20}{1, -20}{2, -25}{3, -25}{4, -27}", f.FacilityName, f.FacilityCapacity, f.DistFromAirCheckpoint, f.DistFromSeaCheckpoint, f.DistFromLandCheckpoint);
+                Console.WriteLine("{0, -20}{1, -20}{2, -20}{3, -25}{4, -25}{5, -27}", f.FacilityName, f.FacilityCapacity, f.FacilityVacancy, f.DistFromAirCheckpoint, f.DistFromSeaCheckpoint, f.DistFromLandCheckpoint);
             }
         }
 
+        //This method takes in person name and the personList, return either the index of the Person in the list OR a -1 value means that its not found.
+        static int FindPerson(string n, List<Person> pList)
+        {
+            bool personFound = false;
+            for (int i = 0; i < pList.Count; i++)
+            {
+                if (pList[i].Name == n)
+                {
+                    personFound = true;
+                    return i;
+                }
+            }
+            if (!personFound)
+            {
+                return -1;
+            }
+        }
+
+        
 
         static void LoadPersonData(List<Person> pList)
         {
@@ -495,8 +491,10 @@ namespace COVID_19_Monitoring_System
                                 List<SHNFacility> fList = GetSHNFacilityDetail();
                                 foreach (SHNFacility f in fList)
                                 {
+                                    //If the Visitor has a facility name 
                                     if (f.FacilityName == items[14])
                                     {
+                                        f.FacilityVacancy -= 1;
                                         te.AssignSHNFacility(f);
                                     }
                                 }
@@ -505,8 +503,6 @@ namespace COVID_19_Monitoring_System
                         }
                         pList.Add(visitor);
                         
-
-
                     }
 
 
@@ -538,6 +534,7 @@ namespace COVID_19_Monitoring_System
                                 {
                                     if (f.FacilityName == items[14])
                                     {
+                                        f.FacilityVacancy -= 1;
                                         te.AssignSHNFacility(f);
                                     }
                                 }
