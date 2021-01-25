@@ -16,7 +16,9 @@ using Newtonsoft.Json;
 
 5) Assign/Replace TraceTogether Token
     3. create and assign a TraceTogetherToken object if resident has no existing (Collection location????)
-//Duplicated name????? Do we need to check for the same name exist in the list
+
+11) Duplicated visitor name????? Do we need to check for the same name exist in the list
+12) Travel entry record. Can we have more than one travel entry record for a person?
 
 12) Try except for DisplayVisitors list (the Facility name one);
 
@@ -141,15 +143,15 @@ namespace COVID_19_Monitoring_System
                                 if (r.Token.IsEligibleForReplacement() == true)
                                 {
                                     r.Token.ReplaceToken(r.Token.SerialNo, r.Token.CollectionLocation);
-                                    Console.WriteLine("{0} is eligible for replacement! \nThe new expiry date is {1}", r.Name, r.Token.ExpiryDate);
+                                    Console.WriteLine("{0}'s Token is eligible for replacement! \nThe new expiry date is {1}", r.Name, r.Token.ExpiryDate);
                                 }
                                 else
                                 {
 
                                     if (currentDate > r.Token.ExpiryDate.AddMonths(1))
-                                        Console.WriteLine("{0} is not eligible for replacement as the token has exceeded the expiry date for more than one month.", r.Name);
+                                        Console.WriteLine("{0}'s Token is not eligible for replacement as the token has exceeded the expiry date for more than one month.", r.Name);
                                     else
-                                        Console.WriteLine("{0} is not eligible for replacement as the token has not expired yet.", r.Name);
+                                        Console.WriteLine("{0}'s Token is not eligible for replacement as the token has not expired yet.", r.Name);
                                 }
                             }
                             else
@@ -158,8 +160,8 @@ namespace COVID_19_Monitoring_System
                                 String newSerialNo = GetRandomSerialNo(serialNums);
                                 serialNums.Add(newSerialNo);
 
-                                //!!!!!!!!!!!!!!!//ASK CHER
-                                string newCL = "(idk)";
+                                Console.Write("Please enter your collection location: ");
+                                string newCL = Console.ReadLine();
                                 DateTime newExpiryDate = currentDate.AddMonths(6);
                                 TraceTogetherToken token = new TraceTogetherToken(newSerialNo, newCL, newExpiryDate);
 
@@ -226,37 +228,60 @@ namespace COVID_19_Monitoring_System
                     {
                         Person p = personList[personIndex];
                         bool businessFound = false;
+                        Console.WriteLine("{0} found!", p.Name);
                         while (true)
                         {
-                            Console.WriteLine("{0} found!", p.Name);
                             DisplayBusinessLocation(businessList);
-                            Console.Write("Please select a Business Location to check-in: ");
-                            string bName = Console.ReadLine();
-                            foreach (BusinessLocation b in businessList)
+                            try
                             {
-                                if (b.BusinessName == bName)
-                                {
-                                    businessFound = true;
-                                    if (!b.isFull())
-                                    {
-                                        DateTime dt = new DateTime();
-                                        SafeEntry se = new SafeEntry(DateTime.Now, dt, b);
+                                Console.Write("Please select a Business Location No. to check-in: ");
+                                int businessNo = Convert.ToInt32(Console.ReadLine());
+                                bool duplicatedCheckedIn = false;
 
-                                        p.AddSafeEntry(se);
-                                        b.VisitorsNow += 1;
-                                        Console.WriteLine("{0} has checked in to the {1}.", p.Name, b.BusinessName);
-                                        break;
-                                    }
-                                    else
+                                for (int i = 0; i < businessList.Count; i++)
+                                {
+                                    if (i + 1 == businessNo)
                                     {
-                                        Console.WriteLine("{0} is at Max Capacity.", bName);
+                                        //Check whether the business name is in the safeentry list of this person
+                                        foreach (SafeEntry se in p.SafeEntryList)
+                                        {
+                                            if (se.Location.BusinessName == businessList[i].BusinessName && se.CheckOut == new DateTime())
+                                            {
+                                                duplicatedCheckedIn = true;
+                                                businessFound = true;
+                                            }
+                                        }
+                                        if (duplicatedCheckedIn == true)
+                                        {
+                                            Console.WriteLine("The business {0} has already checked in but yet to check out!\nPlease check out before you check in again! ", businessList[i].BusinessName);
+                                            break;
+                                        }
+                                        businessFound = true;
+                                        if (!businessList[i].isFull())
+                                        {
+                                            DateTime dt = new DateTime();
+                                            SafeEntry se = new SafeEntry(DateTime.Now, dt, businessList[i]);
+
+                                            p.AddSafeEntry(se);
+                                            businessList[i].VisitorsNow += 1;
+                                            Console.WriteLine("{0} has checked in to the {1}.", p.Name, businessList[i].BusinessName);
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            Console.WriteLine("{0} is at Max Capacity.", businessList[i].BusinessName);
+                                        }
                                     }
                                 }
+                                if (!businessFound)
+                                    Console.WriteLine("The Business No. does not exist in the list. Please try again.");
+                                else
+                                    break;
                             }
-                            if (!businessFound)
-                                Console.WriteLine("'{0}' not found. Please try again.", bName);
-                            else
-                                break;
+                            catch (FormatException ex)
+                            {
+                                Console.WriteLine(ex.Message);
+                            }
                         }
                     }
                 }
@@ -287,8 +312,13 @@ namespace COVID_19_Monitoring_System
                                 isThereCheckedOut = true;
                                 recordNumList.Add(i + 1);
                                 Console.WriteLine("Record No: {0}", i + 1);
-                                Console.WriteLine("{0, -20} {1, -20} {2, -20}", "Check-In", "Check-Out", "Business Location");
-                                Console.WriteLine("{0, -20} {1, -20} {2, -20}", p.SafeEntryList[i].CheckIn, p.SafeEntryList[i].CheckOut, p.SafeEntryList[i].Location.BusinessName);
+                                Console.WriteLine("{0, -25} {1, -25} {2, -25}", "Check-In", "Check-Out", "Business Location");
+                                if (p.SafeEntryList[i].CheckOut == new DateTime())
+                                    Console.WriteLine("{0, -25} {1, -25} {2, -20}", p.SafeEntryList[i].CheckIn, "N/A", p.SafeEntryList[i].Location.BusinessName);
+
+                                else
+                                    Console.WriteLine("{0, -25} {1, -25} {2, -25}", p.SafeEntryList[i].CheckIn, p.SafeEntryList[i].CheckOut, p.SafeEntryList[i].Location.BusinessName);
+
                                 Console.WriteLine();
 
                             }
@@ -595,12 +625,12 @@ namespace COVID_19_Monitoring_System
 
         static void DisplayBusinessLocation(List<BusinessLocation> bList)
         {
-            Console.WriteLine("\nBusinessLocations");
-            Console.WriteLine("{0, -25} {1, -14} {2, -20}", "Business Name", "Branch Code", "Maximum Capacity");
+            Console.WriteLine("\n<-----Business Locations----->");
+            Console.WriteLine("{0, -4} {1, -25} {2, -14} {3, -20} {4, -20}", "No.", "Business Name", "Branch Code", "No. of Visitors Now", "Maximum Capacity");
 
-            foreach (BusinessLocation bl in bList)
+            for (int i = 0; i < bList.Count; i++)
             {
-                Console.WriteLine("{0, -25} {1, -14} {2, -20}", bl.BusinessName, bl.BranchCode, bl.MaximumCapacity);
+                Console.WriteLine("{0, -4} {1, -25} {2, -14} {3, -20} {4, -20}", i+1, bList[i].BusinessName, bList[i].BranchCode, bList[i].VisitorsNow, bList[i].MaximumCapacity);
             }
         }
             
@@ -668,18 +698,23 @@ namespace COVID_19_Monitoring_System
         {
             bool isEmpty = true;
 
-            Console.WriteLine("\n<---SafeEntry Records for everyone--->");
+            Console.WriteLine("\n<-----SafeEntry Records for everyone----->");
             foreach (Person p in pList)
             {
                 if (p.SafeEntryList.Count > 0)
                 {
                     isEmpty = false;
+                    
                     Console.WriteLine("For person: " + p.Name + ": ");
-                    Console.WriteLine("{0, -20} {1, -20} {2, -20}", "Check-In", "Check-Out", "Business Location");
+                    Console.WriteLine("{0, -25} {1, -25} {2, -20}", "Check-In", "Check-Out", "Business Location");
                     foreach(SafeEntry se in p.SafeEntryList)
                     {
-                        Console.WriteLine("{0, -20} {1, -20} {2, -20}", se.CheckIn, se.CheckOut, se.Location.BusinessName);
-
+                        if (se.CheckOut == new DateTime())
+                            Console.WriteLine("{0, -25} {1, -25} {2, -20}", se.CheckIn, "N/A", se.Location.BusinessName);
+                        
+                        else
+                            Console.WriteLine("{0, -25} {1, -25} {2, -20}", se.CheckIn, se.CheckOut, se.Location.BusinessName);
+                        
                     }
                 }
             }
