@@ -12,6 +12,13 @@ using System.Net.Http;
 using System.Globalization;
 using Newtonsoft.Json;
 
+/*Assumption(s)
+ * Task 11
+ *    1.  Cannot add a visitor if a duplicated name is entered.
+ *    2.  Passport number is unique even the name is different.
+ * 
+*/
+
 /* TO DO 
 
 5) Assign/Replace TraceTogether Token
@@ -361,16 +368,52 @@ namespace COVID_19_Monitoring_System
                 /*-----------------Task 11---------------------*/
                 else if (choice == "10")
                 {
-                    //Duplicated name????? Do we need to check for the same name exist in the list
-                    Console.Write("Name: ");
-                    string name = Console.ReadLine();
-                    Console.Write("Passport No.: ");
-                    string passport = Console.ReadLine();
-                    Console.Write("Nationality: ");
-                    string nationality = Console.ReadLine();
+                    DisplayVisitors(visitorList);
 
-                    visitorList.Add(new Visitor(passport, nationality, name));
-                    personList.Add(new Visitor(passport, nationality, name));
+                    
+                    //Check whether the name is duplicated in the visitorlist
+
+                    while (true)
+                    {
+                        Console.Write("\nEnter new visitor name: ");
+                        string name = Console.ReadLine();
+                        bool isNameDuplicated = false;
+                        bool isPassportDuplicated = false;
+
+                        foreach (Visitor v in visitorList)
+                        {
+                            if (v.Name == name)
+                            {
+                                isNameDuplicated = true;
+                                Console.WriteLine("{0} has already existed in the list. Please try again!", v.Name);
+                            }
+                        }
+                        if (isNameDuplicated)
+                            break;
+
+
+                        Console.Write("Enter passport No.: ");
+                        string passport = Console.ReadLine();
+                        foreach (Visitor v in visitorList)
+                        {
+                            if (v.PassportNo == passport)
+                            {
+                                isPassportDuplicated = true;
+                                Console.WriteLine("The passport number is duplicated! Please try again!");
+                            }
+                        }
+                        if (isPassportDuplicated)
+                            break;
+
+                        Console.Write("Enter nationality: ");
+                        string nationality = Console.ReadLine();
+
+                        visitorList.Add(new Visitor(passport, nationality, name));
+                        personList.Add(new Visitor(passport, nationality, name));
+                        Console.WriteLine("Visitor {0} is added to the list successfully!");
+                        break;
+
+                    }
 
                 }
 
@@ -640,18 +683,16 @@ namespace COVID_19_Monitoring_System
 
         static void DisplayVisitors(List<Visitor> vList)
         {
-            Console.WriteLine("\n\nVisitors without TravelEntry");
+            Console.WriteLine("\n<-----Visitors List----->");
             Console.WriteLine("{0, -15} {1, -20} {2, -15}", "Name", "Passport No", "Nationality");
 
 
             foreach (Visitor v in vList)
             {
                  Console.WriteLine("{0, -15} {1, -20} {2, -15}", v.Name, v.PassportNo, v.Nationality);
-                   
-                
             }
             
-            Console.WriteLine("\nVisitors with TravelEntries");
+            Console.WriteLine("\n<Visitors with TravelEntries>");
             foreach (Visitor v in vList)
             {
                 if (v.TravelEntryList.Count > 0)
