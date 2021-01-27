@@ -15,7 +15,7 @@ using Newtonsoft.Json;
 /*Assumption(s)
  * Task 11
  *    1.  Cannot add a visitor if a duplicated name is entered.
- *    2.  Passport number is unique even the name is different.
+ *    2.  Passport number for visitors is unique though the name is different.
  * 
 */
 
@@ -84,6 +84,7 @@ namespace COVID_19_Monitoring_System
                 else if (choice == "1")
                 {
                     DisplayVisitors(visitorList);
+                    Console.WriteLine("\n\n||===========================================================||\n");
                     DisplayResidents(residentList);
                 }
 
@@ -678,15 +679,12 @@ namespace COVID_19_Monitoring_System
         }
             
 
-            
-
 
         static void DisplayVisitors(List<Visitor> vList)
         {
-            Console.WriteLine("\n<-----Visitors List----->");
+            Console.WriteLine("\n<----------Visitors List----------->");
+
             Console.WriteLine("{0, -15} {1, -20} {2, -15}", "Name", "Passport No", "Nationality");
-
-
             foreach (Visitor v in vList)
             {
                  Console.WriteLine("{0, -15} {1, -20} {2, -15}", v.Name, v.PassportNo, v.Nationality);
@@ -701,8 +699,11 @@ namespace COVID_19_Monitoring_System
                     Console.WriteLine("{0,-17} {1, -10} {2, -22} {3, -22} {4, -14} {5, -15}", "TE Last Country", "TE Mode", "TravelEntry Date", "TravelSHN EndDate", "Travells Paid", "Facility Name");
                     foreach (TravelEntry te in v.TravelEntryList)
                     {
-                        //USE TRY CATCH FOR THIS
-                        Console.WriteLine("{0,-17} {1, -10} {2, -22} {3, -22} {4, -14} {5, -15}", te.LastCoutryOfEmbarkation, te.EntryMode, te.EntryDate, te.ShnEndDate, te.IsPaid, te.ShnStay.FacilityName);
+                        if (te.ShnStay == null)
+                            Console.WriteLine("{0,-17} {1, -10} {2, -22} {3, -22} {4, -14} {5, -15}", te.LastCoutryOfEmbarkation, te.EntryMode, te.EntryDate, te.ShnEndDate, te.IsPaid, "Nil");
+
+                        else
+                            Console.WriteLine("{0,-17} {1, -10} {2, -22} {3, -22} {4, -14} {5, -15}", te.LastCoutryOfEmbarkation, te.EntryMode, te.EntryDate, te.ShnEndDate, te.IsPaid, te.ShnStay.FacilityName);
                     }
                 }
             }
@@ -710,11 +711,32 @@ namespace COVID_19_Monitoring_System
 
         static void DisplayResidents(List<Resident> rList)
         {
-            Console.WriteLine("\n\nResidents");
-            Console.WriteLine("Name");
+            Console.WriteLine("\n<----------Residents List----------->");
+
+            Console.WriteLine("{0, -15} {1, -20} {2, -20}", "Name", "Address", "Last Left Country");
             foreach (Resident r in rList)
             {
-                Console.WriteLine(r.Name);
+                Console.WriteLine("{0, -15} {1, -20} {2, -20}", r.Name, r.Address, r.LastLeftCountry);
+            }
+
+            Console.WriteLine("\n<Residents with TravelEntries>");
+            foreach (Resident r in rList)
+            {
+                if (r.TravelEntryList.Count > 0)
+                {
+                    Console.WriteLine("\nTravelEntry for {0}", r.Name);
+                    Console.WriteLine("{0,-17} {1, -10} {2, -22} {3, -22} {4, -14} {5, -15}", "TE Last Country", "TE Mode", "TravelEntry Date", "TravelSHN EndDate", "Travells Paid", "Facility Name");
+                    foreach (TravelEntry te in r.TravelEntryList)
+                    {
+                        if (te.ShnStay == null)
+                            Console.WriteLine("{0,-17} {1, -10} {2, -22} {3, -22} {4, -14} {5, -15}", te.LastCoutryOfEmbarkation, te.EntryMode, te.EntryDate, te.ShnEndDate, te.IsPaid, "Nil");
+
+                        else
+                            Console.WriteLine("{0,-17} {1, -10} {2, -22} {3, -22} {4, -14} {5, -15}", te.LastCoutryOfEmbarkation, te.EntryMode, te.EntryDate, te.ShnEndDate, te.IsPaid, te.ShnStay.FacilityName);
+                        //USE TRY CATCH FOR THIS
+
+                    }
+                }
             }
 
         }
