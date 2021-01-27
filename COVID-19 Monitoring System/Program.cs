@@ -70,9 +70,9 @@ namespace COVID_19_Monitoring_System
 
             while (true)
             {
-                Console.Write("\n========COVID-19 Monitoring System========\n\n<For all Visitors/Residents>\n[1] Display all Visitors and Residents\n[2] Search & List Person Details\n[3] Assign/Replace TraceTogether Token \n\n<For Business Locations>\n[4] Display all Business Locations " +
-                    "\n[5] Edit Business Location Capacity\n\n<For Safe Entries>\n[6] Display all SafeEntry records\n[7] Perform SafeEntry Check-In \n[8] Perform SafeEntry Check-out \n\n<For Travel Entries>\n[9]  Display all SHN facilities \n[10] Add Visitor" +
-                    "\n[11] Create a new Travel Entry Record \n[12] Calculate SHN Charges \n[0]  Exit \n\nChoice: ");
+                Console.Write("\n========COVID-19 Monitoring System========\n\n<=======For all Visitors/Residents=======>\n[1] Display all Visitors and Residents\n[2] Search & List Person Details\n[3] Assign/Replace TraceTogether Token \n\n<=========For Business Locations=========>\n[4] Display all Business Locations " +
+                    "\n[5] Edit Business Location Capacity\n\n<============For Safe Entries============>\n[6] Display all SafeEntry records\n[7] Perform SafeEntry Check-In \n[8] Perform SafeEntry Check-out \n\n<===========For Travel Entries===========>\n[9]  Display all SHN facilities \n[10] Add Visitor" +
+                    "\n[11] Create a new Travel Entry Record \n[12] Calculate SHN Charges \n[0]  Exit \n\nOption: ");
                 string choice = Console.ReadLine();
 
 
@@ -157,18 +157,42 @@ namespace COVID_19_Monitoring_System
                 else if (choice == "5")
                 {
                     bool found = false;
+                    int businessNo = -1;
                     DisplayBusinessLocation(businessList);
-                    Console.Write("\nEnter Business Name to search: ");
-                    string businessName = Console.ReadLine();
-                    foreach (BusinessLocation bl in businessList)
+                    while (true)
                     {
-                        if (bl.BusinessName == businessName)
+                        try
                         {
-                            //DO EXCEPTION HANDLING
+                            Console.Write("\nEnter Business No. to edit: ");
+                            businessNo = Convert.ToInt32(Console.ReadLine());
+                            break;
+                        }
+                        catch (FormatException ex)
+                        {
+                            Console.WriteLine(ex.Message + "\nPlease try again.");
+                        }
+                    }
+                    for (int i = 0; i < businessList.Count; i++)
+                    {
+                        if (i + 1 == businessNo)
+                        {
                             found = true;
-                            Console.Write("{0} found!\nPlease enter the new Maximum Capcity: ", bl.BusinessName);
-                            int newMax = Convert.ToInt32(Console.ReadLine());
-                            bl.MaximumCapacity = newMax;
+                            int newMax = 0;
+                            Console.WriteLine("{0} found!", businessList[i].BusinessName);
+                            while (true)
+                            {
+                                try
+                                {
+                                    Console.Write("\nPlease enter the new Maximum Capcity: ");
+                                    newMax = Convert.ToInt32(Console.ReadLine());
+                                    break;
+                                }
+                                catch (FormatException ex)
+                                {
+                                    Console.WriteLine(ex.Message + "\nPlease try again.");
+                                }
+                            }
+                            businessList[i].MaximumCapacity = newMax;
                             DisplayBusinessLocation(businessList);
                             break;
                         }
@@ -239,9 +263,7 @@ namespace COVID_19_Monitoring_System
                                             break;
                                         }
                                         else
-                                        {
                                             Console.WriteLine("{0} is at Max Capacity.", businessList[i].BusinessName);
-                                        }
                                     }
                                 }
                                 if (!businessFound)
@@ -299,9 +321,20 @@ namespace COVID_19_Monitoring_System
                             Console.WriteLine("Sorry, no SafeEntry record that has not been checked out yet!");
                         else
                         {
-                            Console.Write("\nPlease enter which record to check-out: ");
-                            //EXCEPTION HANDLING
-                            int result = Convert.ToInt32(Console.ReadLine());
+                            int result = 0;
+                            while (true)
+                            {
+                                try
+                                {
+                                    Console.Write("\nPlease enter which record to check-out: ");
+                                    result = Convert.ToInt32(Console.ReadLine());
+                                    break;
+                                }
+                                catch (FormatException ex)
+                                {
+                                    Console.WriteLine(ex.Message + "\nPlease try again.");
+                                }
+                            }
                             //Check whether the number has exceeded the size of the SafeEntryList
                             if (result <= p.SafeEntryList.Count)
                             {
