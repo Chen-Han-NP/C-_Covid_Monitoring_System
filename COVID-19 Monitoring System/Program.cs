@@ -94,44 +94,7 @@ namespace COVID_19_Monitoring_System
                 /*-----------------Task 4---------------------*/
                 else if (choice == "2")
                 {
-                    Console.Write("\nEnter person name: ");
-                    string name = Console.ReadLine();
-                    //Get the PersonIndex from the method
-                    int personIndex = FindPerson(name, personList);
-                    if (personIndex == -1)
-                        Console.WriteLine("Invalid input or the Person name is not found!");
-                    else
-                    {
-                        Person p = personList[personIndex];
-                        if (p is Visitor visitor)
-                        {
-                            Console.WriteLine("Type: Visitor");
-                            Console.WriteLine(visitor.ToString());
-
-                            //For visitor who has a travelEntry
-                            foreach (TravelEntry te in visitor.TravelEntryList)
-                            {
-                                Console.WriteLine(te.ToString());
-                                if (te.ShnStay != null)
-                                    Console.WriteLine("Facility name: " + te.ShnStay.FacilityName);
-                            }
-                        }
-                        else if (p is Resident resident)
-                        {
-                            Console.WriteLine("Type: Resident");
-                            Console.WriteLine(resident.ToString());
-                            if (resident.Token != null)
-                                Console.WriteLine(resident.Token.ToString());
-
-                            //For resident who has a travelEntry
-                            foreach (TravelEntry te in resident.TravelEntryList)
-                            {
-                                Console.WriteLine(te.ToString());
-                                if (te.ShnStay != null)
-                                    Console.WriteLine("Facility name: " + te.ShnStay.FacilityName);
-                            }
-                        }
-                    }
+                    SearchPerson(personList);
                 }
 
 
@@ -530,6 +493,33 @@ namespace COVID_19_Monitoring_System
                     else
                     {
                         Person p = personList[personIndex];
+                        //Display the Person's travel entry info
+                        if (p.TravelEntryList.Count > 0)
+                        {
+                            if (p is Visitor visitor)
+                            {
+                                //For visitor who has a travelEntry
+                                foreach (TravelEntry te in visitor.TravelEntryList)
+                                {
+                                    Console.WriteLine(te.ToString());
+                                    if (te.ShnStay != null)
+                                        Console.WriteLine("Facility name: " + te.ShnStay.FacilityName);
+                                }
+                            }
+                            else if (p is Resident resident)
+                            {
+                                //For resident who has a travelEntry
+                                foreach (TravelEntry te in resident.TravelEntryList)
+                                {
+                                    Console.WriteLine(te.ToString());
+                                    if (te.ShnStay != null)
+                                        Console.WriteLine("Facility name: " + te.ShnStay.FacilityName);
+                                }
+                            }
+                        }
+                        Console.WriteLine();
+                        
+
                         double amountToPay = p.CalculateSHNCharges();
                         if (amountToPay > 0)
                         {
@@ -799,6 +789,49 @@ namespace COVID_19_Monitoring_System
             }
 
         }
+
+        static void SearchPerson(List<Person> pList)
+        {
+            Console.Write("\nEnter person name: ");
+            string name = Console.ReadLine();
+            //Get the PersonIndex from the method
+            int personIndex = FindPerson(name, pList);
+            if (personIndex == -1)
+                Console.WriteLine("Invalid input or the Person name is not found!");
+            else
+            {
+                Person p = pList[personIndex];
+                if (p is Visitor visitor)
+                {
+                    Console.WriteLine("Type: Visitor");
+                    Console.WriteLine(visitor.ToString());
+
+                    //For visitor who has a travelEntry
+                    foreach (TravelEntry te in visitor.TravelEntryList)
+                    {
+                        Console.WriteLine(te.ToString());
+                        if (te.ShnStay != null)
+                            Console.WriteLine("Facility name: " + te.ShnStay.FacilityName);
+                    }
+                }
+                else if (p is Resident resident)
+                {
+                    Console.WriteLine("Type: Resident");
+                    Console.WriteLine(resident.ToString());
+                    if (resident.Token != null)
+                        Console.WriteLine(resident.Token.ToString());
+
+                    //For resident who has a travelEntry
+                    foreach (TravelEntry te in resident.TravelEntryList)
+                    {
+                        Console.WriteLine(te.ToString());
+                        if (te.ShnStay != null)
+                            Console.WriteLine("Facility name: " + te.ShnStay.FacilityName);
+                    }
+                }
+            }
+        }
+
 
         static String GetRandomSerialNo(List<String> sList)
         {
