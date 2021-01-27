@@ -41,27 +41,25 @@ namespace COVID_19_Monitoring_System
             double totalCost = 0;
             foreach(TravelEntry te in TravelEntryList)
             {
-                if (te.ShnEndDate > DateTime.Now)
+                if (!te.IsPaid)
                 {
-                    Console.WriteLine("Your stay has not ended yet!");
-                    return -1;
-                }
-                else if (te.IsPaid)
-                {
-                    Console.WriteLine("You have paid your SHN charges!");
-                    return -1;
-                }
-                else if (te.ShnEndDate <= DateTime.Now && !te.IsPaid)
-                {
-                    List<String> countriesList = new List<String> { "Vietnam", "New Zealand", "Macao SAR" };
-                    if (countriesList.Contains(te.LastCoutryOfEmbarkation))
+                    if (te.ShnEndDate > DateTime.Now)
                     {
-                        totalCost = (200 + 80) * 1.07;
+                        Console.WriteLine("Your stay has not ended yet!");
+                        return 0;
                     }
                     else
                     {
-                        double travelCost = te.ShnStay.CalculateTravelCost(te.EntryMode, te.EntryDate);
-                        totalCost = (travelCost + 2000 + 200) * 1.07;
+                        List<String> countriesList = new List<String> { "Vietnam", "New Zealand", "Macao SAR" };
+                        if (countriesList.Contains(te.LastCoutryOfEmbarkation))
+                        {
+                            totalCost = (200 + 80) * 1.07;
+                        }
+                        else
+                        {
+                            double travelCost = te.ShnStay.CalculateTravelCost(te.EntryMode, te.EntryDate);
+                            totalCost = (travelCost + 2000 + 200) * 1.07;
+                        }
                     }
                 }
 

@@ -432,10 +432,17 @@ namespace COVID_19_Monitoring_System
                         {
                             foreach (TravelEntry te in p.TravelEntryList)
                             {
+                                if (te.ShnEndDate > DateTime.Now)
+                                {
+                                    isEligibleForTE = false;
+                                    Console.WriteLine("{0} stay has not ended yet!", p.Name);
+                                    break;
+                                }
+                                
                                 if (!te.IsPaid)
                                 {
                                     isEligibleForTE = false;
-                                    Console.WriteLine("Person {0} has not ended his/her SHN quarantine yet!", p.Name);
+                                    Console.WriteLine("{0} has not paid for the previous fees!", p.Name);
                                     break;
                                 }
                             }
@@ -504,6 +511,7 @@ namespace COVID_19_Monitoring_System
                                 TravelEntry newTravelEntry = new TravelEntry(lastCountryTravelled, entryMode, DateTime.Now);
                                 newTravelEntry.CalculateSHNDuration();
                                 p.AddTravelEntry(newTravelEntry);
+                                Console.WriteLine("A new travel entry has successfully added!");
                             }
                             
                         }
@@ -550,6 +558,8 @@ namespace COVID_19_Monitoring_System
                                 }
                             }
                         }
+                        else
+                            Console.WriteLine("You do not have anything to pay.");
                         Console.WriteLine();
                         
 
@@ -561,13 +571,20 @@ namespace COVID_19_Monitoring_System
                             string payNow = Console.ReadLine();
                             if (payNow == "Y")
                             {
-                                p.TravelEntryList[0].IsPaid = true;
+                                foreach (TravelEntry te in p.TravelEntryList)
+                                {
+                                    te.IsPaid = true;
+                                }
                                 Console.WriteLine("Payment successful.");
                             }
                             else if (payNow == "N")
                             {
                                 Console.WriteLine("Payment not made.");
                             }
+                        }
+                        if (amountToPay == 0)
+                        {
+                            Console.WriteLine("You do not have to pay anything at the moment!");
                         }
                     }
 

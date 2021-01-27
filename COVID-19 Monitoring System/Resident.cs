@@ -48,34 +48,32 @@ namespace COVID_19_Monitoring_System
             double totalCost = 0;
             foreach (TravelEntry te in TravelEntryList)
             {
-                if (te.ShnEndDate > DateTime.Now)
+                if (!te.IsPaid)
                 {
-                    Console.WriteLine("Your stay has not ended yet!");
-                    return -1;
-                }
-                else if (te.IsPaid)
-                {
-                    Console.WriteLine("You have paid your SHN charges!");
-                    return -1;
-                }
-                else if (te.ShnEndDate <= DateTime.Now && !te.IsPaid)
-                {
-                    if (te.LastCoutryOfEmbarkation == "New Zealand" || te.LastCoutryOfEmbarkation == "Vietnam")
+                    if (te.ShnEndDate > DateTime.Now)
                     {
-                        totalCost = 200 * 1.07;
-                    }
-                    else if (te.LastCoutryOfEmbarkation == "Macao SAR")
-                    {
-                        totalCost = (200 + 20) * 1.07;
+                        Console.WriteLine("Your stay has not ended yet!");
+                        return 0;
                     }
                     else
                     {
-                        totalCost = (200 + 20 + 1000) * 1.07;
+                        if (te.LastCoutryOfEmbarkation == "New Zealand" || te.LastCoutryOfEmbarkation == "Vietnam")
+                        {
+                            totalCost = 200 * 1.07;
+                        }
+                        else if (te.LastCoutryOfEmbarkation == "Macao SAR")
+                        {
+                            totalCost = (200 + 20) * 1.07;
+                        }
+                        else
+                        {
+                            totalCost = (200 + 20 + 1000) * 1.07;
+                        }
                     }
                 }
-
             }
             return totalCost;
+
         }
 
         public override string ToString()
@@ -84,3 +82,5 @@ namespace COVID_19_Monitoring_System
         }
     }
 }
+
+
