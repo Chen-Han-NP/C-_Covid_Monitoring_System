@@ -80,7 +80,7 @@ namespace COVID_19_Monitoring_System
 
         public override string ToString()
         {
-            return "Name: " + Name + "\nAddress: " + Address + "\nLast Left Country: " + LastLeftCountry;
+            return "Name: " + Name + "\nAddress: " + Address + "\nLast Left Country: " + LastLeftCountry.ToString("dd MMMM, yyyy");
         }
     }
 }

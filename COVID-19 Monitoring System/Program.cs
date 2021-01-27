@@ -70,9 +70,9 @@ namespace COVID_19_Monitoring_System
 
             while (true)
             {
-                Console.Write("\n========COVID-19 Monitoring System========\n[1] Display all Visitors and Residents\n[2] List Person Details\n[3] Assign/Replace TraceTogether Token \n[4] Display all Business Locations " +
-                    "\n[5] Edit Business Location Capacity\n[6] Display all SafeEntry records\n[7] Perform SafeEntry Check-In \n[8] Perform SafeEntry Check-out \n[9] Display all SHN facilities \n[10] Add Visitor" +
-                    "\n[11] Create a new Travel Entry Record \n[12] Calculate SHN Charges \n[0] Exit \nChoice: ");
+                Console.Write("\n========COVID-19 Monitoring System========\n\n<For all Visitors/Residents>\n[1] Display all Visitors and Residents\n[2] Search & List Person Details\n[3] Assign/Replace TraceTogether Token \n\n<For Business Locations>\n[4] Display all Business Locations " +
+                    "\n[5] Edit Business Location Capacity\n\n<For Safe Entries>\n[6] Display all SafeEntry records\n[7] Perform SafeEntry Check-In \n[8] Perform SafeEntry Check-out \n\n<For Travel Entries>\n[9]  Display all SHN facilities \n[10] Add Visitor" +
+                    "\n[11] Create a new Travel Entry Record \n[12] Calculate SHN Charges \n[0]  Exit \n\nChoice: ");
                 string choice = Console.ReadLine();
 
 
@@ -84,7 +84,7 @@ namespace COVID_19_Monitoring_System
                 else if (choice == "1")
                 {
                     DisplayVisitors(visitorList);
-                    Console.WriteLine("\n\n||===========================================================||\n");
+                    Console.WriteLine("\n||===========================================================||");
                     DisplayResidents(residentList);
                 }
 
@@ -370,7 +370,6 @@ namespace COVID_19_Monitoring_System
                 else if (choice == "10")
                 {
                     DisplayVisitors(visitorList);
-
                     
                     //Check whether the name is duplicated in the visitorlist
 
@@ -411,7 +410,7 @@ namespace COVID_19_Monitoring_System
 
                         visitorList.Add(new Visitor(passport, nationality, name));
                         personList.Add(new Visitor(passport, nationality, name));
-                        Console.WriteLine("Visitor {0} is added to the list successfully!");
+                        Console.WriteLine("Visitor {0} is added to the list successfully!", name);
                         break;
 
                     }
@@ -430,42 +429,97 @@ namespace COVID_19_Monitoring_System
                     else
                     {
                         Person p = personList[personIndex];
-                        Console.Write("Enter your last country of embarkation: ");
-                        string lastCountryTravelled = Console.ReadLine();
-                        Console.Write("Enter your entry mode(Air/Sea/Land): ");
-                        string entryMode = Console.ReadLine();
-                        TravelEntry newTravelEntry = new TravelEntry(lastCountryTravelled, entryMode, DateTime.Now);
-                        newTravelEntry.CalculateSHNDuration();
-
-                        List<String> countriesList = new List<String> { "Vietnam", "New Zealand", "Macao SAR" };
-                        if (!countriesList.Contains(newTravelEntry.LastCoutryOfEmbarkation))
+                        bool isEligibleForTE = true;
+                        //Now check whether the person is eligible for a new Travel Entry
+                            
+                        if (p.TravelEntryList.Count > 0)
                         {
-
-                            DisplaySHNFacilities(SHNList);
-                            Console.Write("Please select a SHNFacility from above: ");
-                            string fName = Console.ReadLine();
-                            bool shnFound = false;
-                            foreach (SHNFacility f in SHNList)
+                            foreach (TravelEntry te in p.TravelEntryList)
                             {
-                                if (fName == f.FacilityName)
+                                if (!te.IsPaid)
                                 {
-                                    if (f.IsAvailable())
-                                    {
-                                        shnFound = true;
-                                        newTravelEntry.AssignSHNFacility(f);
-                                        f.FacilityVacancy -= 1;
-                                        Console.WriteLine("{0} is available! {1} has checked in.", f.FacilityName, p.Name);
-                                    }
+                                    isEligibleForTE = false;
+                                    Console.WriteLine("Person {0} has not ended his/her SHN quarantine yet!", p.Name);
+                                    break;
                                 }
                             }
-                            if (!shnFound)
-                                Console.WriteLine("There is no vacant slots or the Facility name is not found!");
                         }
+                        if (isEligibleForTE)
+                        {
+                            List<String> modeList = new List<String> { "Air", "Sea", "Land" };
+                            List<String> countriesList = new List<String> { "Vietnam", "New Zealand", "Macao SAR" };
 
-                        p.AddTravelEntry(newTravelEntry);
+                            
+                            Console.Write("Enter your last country of embarkation: ");
+                            string lastCountryTravelled = Console.ReadLine();
+                            Console.Write("Enter your entry mode(Air/Sea/Land): ");
+                            string entryMode = Console.ReadLine();
+                            while (!modeList.Contains(entryMode))
+                            {
+                                Console.WriteLine("Please enter a valid entry mode!");
+                                Console.Write("Enter your entry mode(Air/Sea/Land): ");
+                                entryMode = Console.ReadLine();
+                                if (modeList.Contains(entryMode))
+                                    break;
+                            }
+
+
+                            if (!countriesList.Contains(lastCountryTravelled))
+                            {
+
+                                DisplaySHNFacilities(SHNList);
+                                try
+                                {
+
+                                    Console.Write("Please select a SHNFacility No. from above: ");
+                                    int fIndex = Convert.ToInt32(Console.ReadLine());
+                                    bool shnFound = false;
+                                    
+                                    foreach (SHNFacility f in SHNList)
+                                    {
+                                        if (SHNList[fIndex-1].FacilityName == f.FacilityName)
+                                        {
+                                            if (f.IsAvailable())
+                                            {
+                                                shnFound = true; 
+                                                TravelEntry newTravelEntry = new TravelEntry(lastCountryTravelled, entryMode, DateTime.Now);
+                                                newTravelEntry.CalculateSHNDuration();
+                                                p.AddTravelEntry(newTravelEntry);
+                                                newTravelEntry.AssignSHNFacility(f);
+                                                f.FacilityVacancy -= 1;
+                                                Console.WriteLine("{0} is available! {1} has checked in.", f.FacilityName, p.Name);
+                                            }
+                                        }
+                                    }
+                                    if (!shnFound)
+                                        Console.WriteLine("There is no vacant slots in facility {0}!", SHNList[fIndex-1].FacilityName);
+
+                                }
+                                catch (FormatException ex)
+                                {
+                                    Console.WriteLine(ex.Message);
+                                    Console.WriteLine("Please enter a valid number from above!");
+                                }
+
+                            }
+
+                            else
+                            {
+                                TravelEntry newTravelEntry = new TravelEntry(lastCountryTravelled, entryMode, DateTime.Now);
+                                newTravelEntry.CalculateSHNDuration();
+                                p.AddTravelEntry(newTravelEntry);
+                            }
+                            
+                        }
+                        else
+                        {
+                            Console.WriteLine("Not eligible to add Travel Entry");
+                        }
                     }
                 }
 
+
+                //Task 12
                 else if (choice == "12")
                 {
                     Console.Write("Enter person name: ");
@@ -494,6 +548,11 @@ namespace COVID_19_Monitoring_System
                         }
                     }
 
+                }
+
+                else
+                {
+                    Console.WriteLine("Please enter a valid choice number!");
                 }
             }
         }
@@ -537,10 +596,10 @@ namespace COVID_19_Monitoring_System
         static void DisplaySHNFacilities(List<SHNFacility> fList)
         {
             Console.WriteLine("\nSHN Facilities");
-            Console.WriteLine("{0, -20}{1, -20}{2, -20}{3, -25}{4, -25}{5, -27}", "Facility Name", "Facility Capacity", "Facility Vacancy", "Dist from air checkpoint", "Dist from sea checkpoint", "Dist from land checkpoint");
-            foreach(SHNFacility f in fList)
+            Console.WriteLine("{0, -5}{1, -20}{2, -20}{3, -20}{4, -20}{5, -20}{6, -20}", "No.", "Facility Name", "Facility Capacity", "Facility Vacancy", "Dist from air C.P.", "Dist from sea C.P.", "Dist from land C.P. (km)");
+            for (int i = 0; i < fList.Count; i++)
             {
-                Console.WriteLine("{0, -20}{1, -20}{2, -20}{3, -25}{4, -25}{5, -27}", f.FacilityName, f.FacilityCapacity, f.FacilityVacancy, f.DistFromAirCheckpoint, f.DistFromSeaCheckpoint, f.DistFromLandCheckpoint);
+                Console.WriteLine("{0, -5}{1, -20}{2, -20}{3, -20}{4, -20}{5, -20}{6, -20}", i+1 , fList[i].FacilityName, fList[i].FacilityCapacity, fList[i].FacilityVacancy, fList[i].DistFromAirCheckpoint, fList[i].DistFromSeaCheckpoint, fList[i].DistFromLandCheckpoint);
             }
         }
 
@@ -716,7 +775,7 @@ namespace COVID_19_Monitoring_System
             Console.WriteLine("{0, -15} {1, -20} {2, -20}", "Name", "Address", "Last Left Country");
             foreach (Resident r in rList)
             {
-                Console.WriteLine("{0, -15} {1, -20} {2, -20}", r.Name, r.Address, r.LastLeftCountry);
+                Console.WriteLine("{0, -15} {1, -20} {2, -20}", r.Name, r.Address, r.LastLeftCountry.ToString("dd MMMM, yyyy"));
             }
 
             Console.WriteLine("\n<Residents with TravelEntries>");
