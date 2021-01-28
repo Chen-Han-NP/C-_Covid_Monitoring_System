@@ -14,23 +14,20 @@ using Newtonsoft.Json;
 
 /*Assumption(s)
  * Task 11
- *    1.  Cannot add a visitor if a duplicated name is entered.
+ *    1.  Cannot add a new visitor if a duplicated name is entered.
  *    2.  Passport number for visitors is unique though the name is different.
  * 
 */
+/*Other Possible Features added:
+ * Our advanced feature 3.3 is to allow anyone staying in SHN and 
+ * eligible to pay off any amount for their SHN Charges and 
+ * show whether the SHN Charges are fully paid off or not. 
+ * If successful, it will show the money change. 
+ * Otherwise, it will show the amount of money left to pay.
+ * 
+ * */
 
-/* TO DO 
 
-5) Assign/Replace TraceTogether Token
-    3. create and assign a TraceTogetherToken object if resident has no existing (Collection location????)
-
-11) Duplicated visitor name????? Do we need to check for the same name exist in the list
-12) Travel entry record. Can we have more than one travel entry record for a person?
-
-12) Try except for DisplayVisitors list (the Facility name one);
-
-Update UI for choice 1, need to add Resident details and Residents with Travel records
-*/
 
 
 namespace COVID_19_Monitoring_System
@@ -151,7 +148,7 @@ namespace COVID_19_Monitoring_System
                                 if (r.Token.IsEligibleForReplacement() == true)
                                 {
                                     r.Token.ReplaceToken(r.Token.SerialNo, r.Token.CollectionLocation);
-                                    Console.WriteLine("{0}'s Token is eligible for replacement! \nThe new expiry date is {1}", r.Name, r.Token.ExpiryDate);
+                                    Console.WriteLine("{0}'s Token is eligible for replacement! \nThe new expiry date is {1}", r.Name, r.Token.ExpiryDate.ToString("yyyy-MM-dd h:mm tt"));
                                 }
                                 else
                                 {
@@ -574,57 +571,154 @@ namespace COVID_19_Monitoring_System
                     {
                         Person p = personList[personIndex];
                         //Display the Person's travel entry info
-                        if (p.TravelEntryList.Count > 0)
+
+                        //<Advanced feature 3.3>
+                        //Firstly, check whether this person has any amount due
+                        if (p.AmountDue == 0)
                         {
-                            if (p is Visitor visitor)
+                            //If no, check whether he has any travel entry and list them out.
+                            if (p.TravelEntryList.Count > 0)
                             {
-                                //For visitor who has a travelEntry
-                                foreach (TravelEntry te in visitor.TravelEntryList)
+                                if (p is Visitor visitor)
                                 {
-                                    Console.WriteLine(te.ToString());
-                                    if (te.ShnStay != null)
-                                        Console.WriteLine("Facility name: " + te.ShnStay.FacilityName);
+                                    //For visitor who has a travelEntry
+                                    foreach (TravelEntry te in visitor.TravelEntryList)
+                                    {
+                                        Console.WriteLine(te.ToString());
+                                        if (te.ShnStay != null)
+                                            Console.WriteLine("Facility name: " + te.ShnStay.FacilityName);
+                                    }
+                                }
+                                else if (p is Resident resident)
+                                {
+                                    //For resident who has a travelEntry
+                                    foreach (TravelEntry te in resident.TravelEntryList)
+                                    {
+                                        Console.WriteLine(te.ToString());
+                                        if (te.ShnStay != null)
+                                            Console.WriteLine("Facility name: " + te.ShnStay.FacilityName);
+                                    }
                                 }
                             }
-                            else if (p is Resident resident)
+                            else
+                                Console.WriteLine("You do not have anything to pay.");
+
+                            double amountToPay = p.CalculateSHNCharges();
+                            if (amountToPay > 0)
                             {
-                                //For resident who has a travelEntry
-                                foreach (TravelEntry te in resident.TravelEntryList)
+                                Console.WriteLine("Total amount to pay: ${0}.", amountToPay.ToString("#0.00"));
+                                Console.Write("Make payment now? (Y/N): ");
+                                string payNow = Console.ReadLine();
+                                if (payNow == "Y")
                                 {
-                                    Console.WriteLine(te.ToString());
-                                    if (te.ShnStay != null)
-                                        Console.WriteLine("Facility name: " + te.ShnStay.FacilityName);
+                                    double amountPaid = 0;
+                                    while (true)
+                                    {
+                                        try
+                                        {
+                                            Console.Write("Please enter the amount you can pay at the moment: $");
+                                            amountPaid = Convert.ToDouble(Console.ReadLine());
+                                            break;
+                                        }
+                                        catch (FormatException ex)
+                                        {
+                                            Console.WriteLine(ex.Message);
+                                            Console.WriteLine("Please try again!");
+                                        }
+                                    }
+                                    if (amountPaid > amountToPay)
+                                    {
+                                        Console.WriteLine("You have paid off your Charges! Here is your change ${0}!", (amountPaid - amountToPay).ToString("#0.00"));
+                                    }
+                                    else if (amountToPay == amountPaid)
+                                    {
+                                        Console.WriteLine("You have paid off your Charges!");
+                                    }
+                                    else
+                                    {
+                                        double amountDue = amountToPay - amountPaid;
+                                        p.AmountDue = amountDue;
+                                        Console.WriteLine("You have paid ${0}! Amount left to pay: ${1}", amountPaid.ToString("#0.00"), amountDue.ToString("#0.00"));
+                                    }
+
+
+                                    foreach (TravelEntry te in p.TravelEntryList)
+                                    {
+                                        te.IsPaid = true;
+                                    }
+                                    Console.WriteLine("Payment successful.");
                                 }
+
+                                else if (payNow == "N")
+                                    Console.WriteLine("Payment not made.");
+                                else
+                                    Console.WriteLine("Invalid input");
+
+                            }
+
+                            if (amountToPay == 0)
+                            {
+                                Console.WriteLine("You do not have to pay anything at the moment!");
                             }
                         }
-                        else
-                            Console.WriteLine("You do not have anything to pay.");
-                        Console.WriteLine();
-                        
 
-                        double amountToPay = p.CalculateSHNCharges();
-                        if (amountToPay > 0)
+                        //If the person already has an amount due
+                        else
                         {
-                            Console.WriteLine("Total amount to pay: ${0}.", amountToPay.ToString("#0.00"));
-                            Console.Write("Make payment now? (Y/N): ");
+                            Console.Write("You have ${0} left to pay.\nPay now?(Y/N): ", p.AmountDue.ToString("#0.00"));
                             string payNow = Console.ReadLine();
+                            double amountToPay = p.AmountDue;
                             if (payNow == "Y")
                             {
+                                double amountPaid = 0;
+                                while (true)
+                                {
+                                    try
+                                    {
+                                        Console.Write("Please enter the amount you can pay at the moment: $");
+                                        amountPaid = Convert.ToDouble(Console.ReadLine());
+                                        break;
+                                    }
+                                    catch (FormatException ex)
+                                    {
+                                        Console.WriteLine(ex.Message);
+                                        Console.WriteLine("Please try again!");
+                                    }
+                                }
+                                if (amountPaid > amountToPay)
+                                {
+                                    p.AmountDue = 0;
+                                    Console.WriteLine("You have paid off your Charges! Here is your change ${0}!", (amountPaid - amountToPay).ToString("#0.00"));
+                                }
+                                else if (amountToPay == amountPaid)
+                                {
+                                    Console.WriteLine("You have paid off your Charges!");
+                                }
+                                else
+                                {
+                                    double amountDue = amountToPay - amountPaid;
+                                    p.AmountDue = amountDue;
+                                    Console.WriteLine("You have paid ${0}! Amount left to pay: ${1}", amountPaid.ToString("#0.00"), amountDue.ToString("#0.00"));
+                                }
+
+
                                 foreach (TravelEntry te in p.TravelEntryList)
                                 {
                                     te.IsPaid = true;
                                 }
                                 Console.WriteLine("Payment successful.");
                             }
+
                             else if (payNow == "N")
-                            {
                                 Console.WriteLine("Payment not made.");
-                            }
+                            else
+                                Console.WriteLine("Invalid input");
+
+
                         }
-                        if (amountToPay == 0)
-                        {
-                            Console.WriteLine("You do not have to pay anything at the moment!");
-                        }
+                        
+                        
+                        
                     }
 
                 }
@@ -743,6 +837,7 @@ namespace COVID_19_Monitoring_System
                             }
                             visitor.AddTravelEntry(te);
                         }
+                        visitor.AmountDue = 0;
                         pList.Add(visitor);
                         
                     }
@@ -782,6 +877,7 @@ namespace COVID_19_Monitoring_System
                             }
                             resident.AddTravelEntry(te);
                         }
+                        resident.AmountDue = 0;
                         pList.Add(resident);
 
                     }
@@ -886,7 +982,6 @@ namespace COVID_19_Monitoring_System
         }
 
 
-
         static String GetRandomSerialNo(List<String> sList)
         {
             while (true)
@@ -934,7 +1029,14 @@ namespace COVID_19_Monitoring_System
             }
 
         }
+
+       static void Payment(List<Person> pList, double a, string p)
+        {
+
+
             
+
+        }
 
     }
 }

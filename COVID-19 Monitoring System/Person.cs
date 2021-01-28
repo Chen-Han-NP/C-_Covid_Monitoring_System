@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+//Advanced Feature: Added in another class variable amountDue to keep track of the SHN charges due of a person.
 namespace COVID_19_Monitoring_System
 {
     abstract class Person
@@ -19,6 +20,17 @@ namespace COVID_19_Monitoring_System
             get { return name; }
             set { name = value; }
         }
+
+
+        private double amountDue;
+
+        public double AmountDue
+        {
+            get { return amountDue; }
+            set { amountDue = value; }
+        }
+
+
 
         private List<SafeEntry> safeEntryList;  
 
@@ -46,6 +58,7 @@ namespace COVID_19_Monitoring_System
             Name = n;
             SafeEntryList = new List<SafeEntry>();
             TravelEntryList = new List<TravelEntry>();
+            
         }
 
         public void AddTravelEntry(TravelEntry te)
