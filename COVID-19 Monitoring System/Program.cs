@@ -94,7 +94,44 @@ namespace COVID_19_Monitoring_System
                 /*-----------------Task 4---------------------*/
                 else if (choice == "2")
                 {
-                    SearchPerson(personList);
+                    Console.Write("\nEnter person name: ");
+                    string name = Console.ReadLine();
+                    //Get the PersonIndex from the method
+                    int personIndex = FindPerson(name, personList);
+                    if (personIndex == -1)
+                        Console.WriteLine("Invalid input or the Person name is not found!");
+                    else
+                    {
+                        Person p = personList[personIndex];
+                        if (p is Visitor visitor)
+                        {
+                            Console.WriteLine("Type: Visitor");
+                            Console.WriteLine(visitor.ToString());
+
+                            //For visitor who has a travelEntry
+                            foreach (TravelEntry te in visitor.TravelEntryList)
+                            {
+                                Console.WriteLine(te.ToString());
+                                if (te.ShnStay != null)
+                                    Console.WriteLine("Facility name: " + te.ShnStay.FacilityName);
+                            }
+                        }
+                        else if (p is Resident resident)
+                        {
+                            Console.WriteLine("Type: Resident");
+                            Console.WriteLine(resident.ToString());
+                            if (resident.Token != null)
+                                Console.WriteLine(resident.Token.ToString());
+
+                            //For resident who has a travelEntry
+                            foreach (TravelEntry te in resident.TravelEntryList)
+                            {
+                                Console.WriteLine(te.ToString());
+                                if (te.ShnStay != null)
+                                    Console.WriteLine("Facility name: " + te.ShnStay.FacilityName);
+                            }
+                        }
+                    }
                 }
 
 
@@ -165,8 +202,10 @@ namespace COVID_19_Monitoring_System
                         {
                             Console.Write("\nEnter Business No. to edit: ");
                             businessNo = Convert.ToInt32(Console.ReadLine());
+                            
                             break;
                         }
+
                         catch (FormatException ex)
                         {
                             Console.WriteLine(ex.Message + "\nPlease try again.");
@@ -601,7 +640,7 @@ namespace COVID_19_Monitoring_System
 
 
         //Task 2.1
-        //Make a methdo that calls the API and search for the detail of the SHN facility using the name
+        //Make a method that calls the API and search for the detail of the SHN facility using the name
         static List<SHNFacility> GetSHNFacilityDetail()
         {
             using (HttpClient client = new HttpClient())
@@ -715,7 +754,7 @@ namespace COVID_19_Monitoring_System
                         //Check whether the resident has any TraceTogetherToken
                         if (items[6] != "")
                         {
-                            TraceTogetherToken ttt = new TraceTogetherToken(items[6], items[7], Convert.ToDateTime(items[8]));
+                            TraceTogetherToken ttt = new TraceTogetherToken(items[6], items[7], DateTime.ParseExact(items[8], "dd/MM/yyyy", CultureInfo.InvariantCulture));
                             resident.Token = ttt;
 
                         }
@@ -799,10 +838,10 @@ namespace COVID_19_Monitoring_System
                     foreach (TravelEntry te in v.TravelEntryList)
                     {
                         if (te.ShnStay == null)
-                            Console.WriteLine("{0,-17} {1, -10} {2, -22} {3, -22} {4, -14} {5, -15}", te.LastCoutryOfEmbarkation, te.EntryMode, te.EntryDate, te.ShnEndDate, te.IsPaid, "Nil");
+                            Console.WriteLine("{0,-17} {1, -10} {2, -22} {3, -22} {4, -14} {5, -15}", te.LastCoutryOfEmbarkation, te.EntryMode, te.EntryDate.ToString("yyyy-MM-dd h:mm tt"), te.ShnEndDate.ToString("yyyy-MM-dd h:mm tt"), te.IsPaid, "Nil");
 
                         else
-                            Console.WriteLine("{0,-17} {1, -10} {2, -22} {3, -22} {4, -14} {5, -15}", te.LastCoutryOfEmbarkation, te.EntryMode, te.EntryDate, te.ShnEndDate, te.IsPaid, te.ShnStay.FacilityName);
+                            Console.WriteLine("{0,-17} {1, -10} {2, -22} {3, -22} {4, -14} {5, -15}", te.LastCoutryOfEmbarkation, te.EntryMode, te.EntryDate.ToString("yyyy-MM-dd h:mm tt"), te.ShnEndDate.ToString("yyyy-MM-dd h:mm tt"), te.IsPaid, te.ShnStay.FacilityName);
                     }
                 }
             }
@@ -815,7 +854,15 @@ namespace COVID_19_Monitoring_System
             Console.WriteLine("{0, -15} {1, -20} {2, -20}", "Name", "Address", "Last Left Country");
             foreach (Resident r in rList)
             {
-                Console.WriteLine("{0, -15} {1, -20} {2, -20}", r.Name, r.Address, r.LastLeftCountry.ToString("dd MMMM, yyyy"));
+                Console.WriteLine("{0, -15} {1, -20} {2, -20}", r.Name, r.Address, r.LastLeftCountry.ToString("dd MMMM yyyy"));
+            }
+
+            Console.WriteLine("\n<Residents with TraceTogetherTokens>");
+            Console.WriteLine("{0, -10} {1,-15} {2, -24} {3, -22}", "Name", "Serial No.", "Collection Location", "Expiry Date");
+            foreach (Resident r in rList)
+            {
+                if (r.Token != null)
+                    Console.WriteLine("{0, -10} {1,-15} {2, -24} {3, -22}", r.Name, r.Token.SerialNo, r.Token.CollectionLocation, r.Token.ExpiryDate.ToString("yyyy-MM-dd h:mm tt"));
             }
 
             Console.WriteLine("\n<Residents with TravelEntries>");
@@ -828,59 +875,16 @@ namespace COVID_19_Monitoring_System
                     foreach (TravelEntry te in r.TravelEntryList)
                     {
                         if (te.ShnStay == null)
-                            Console.WriteLine("{0,-17} {1, -10} {2, -22} {3, -22} {4, -14} {5, -15}", te.LastCoutryOfEmbarkation, te.EntryMode, te.EntryDate, te.ShnEndDate, te.IsPaid, "Nil");
+                            Console.WriteLine("{0,-17} {1, -10} {2, -22} {3, -22} {4, -14} {5, -15}", te.LastCoutryOfEmbarkation, te.EntryMode, te.EntryDate.ToString("yyyy-MM-dd h:mm tt"), te.ShnEndDate.ToString("yyyy-MM-dd h:mm tt"), te.IsPaid, "Nil");
 
                         else
-                            Console.WriteLine("{0,-17} {1, -10} {2, -22} {3, -22} {4, -14} {5, -15}", te.LastCoutryOfEmbarkation, te.EntryMode, te.EntryDate, te.ShnEndDate, te.IsPaid, te.ShnStay.FacilityName);
-                        //USE TRY CATCH FOR THIS
-
+                            Console.WriteLine("{0,-17} {1, -10} {2, -22} {3, -22} {4, -14} {5, -15}", te.LastCoutryOfEmbarkation, te.EntryMode, te.EntryDate.ToString("yyyy-MM-dd h:mm tt"), te.ShnEndDate.ToString("yyyy-MM-dd h:mm tt"), te.IsPaid, te.ShnStay.FacilityName);
                     }
                 }
             }
 
         }
 
-        static void SearchPerson(List<Person> pList)
-        {
-            Console.Write("\nEnter person name: ");
-            string name = Console.ReadLine();
-            //Get the PersonIndex from the method
-            int personIndex = FindPerson(name, pList);
-            if (personIndex == -1)
-                Console.WriteLine("Invalid input or the Person name is not found!");
-            else
-            {
-                Person p = pList[personIndex];
-                if (p is Visitor visitor)
-                {
-                    Console.WriteLine("Type: Visitor");
-                    Console.WriteLine(visitor.ToString());
-
-                    //For visitor who has a travelEntry
-                    foreach (TravelEntry te in visitor.TravelEntryList)
-                    {
-                        Console.WriteLine(te.ToString());
-                        if (te.ShnStay != null)
-                            Console.WriteLine("Facility name: " + te.ShnStay.FacilityName);
-                    }
-                }
-                else if (p is Resident resident)
-                {
-                    Console.WriteLine("Type: Resident");
-                    Console.WriteLine(resident.ToString());
-                    if (resident.Token != null)
-                        Console.WriteLine(resident.Token.ToString());
-
-                    //For resident who has a travelEntry
-                    foreach (TravelEntry te in resident.TravelEntryList)
-                    {
-                        Console.WriteLine(te.ToString());
-                        if (te.ShnStay != null)
-                            Console.WriteLine("Facility name: " + te.ShnStay.FacilityName);
-                    }
-                }
-            }
-        }
 
 
         static String GetRandomSerialNo(List<String> sList)

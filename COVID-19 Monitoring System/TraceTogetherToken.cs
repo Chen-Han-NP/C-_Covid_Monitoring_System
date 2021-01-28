@@ -69,7 +69,7 @@ namespace COVID_19_Monitoring_System
 
         public override string ToString()
         {
-            return "\n<---TraceTogetherToken Info---> " + "\nSerial No.: " + SerialNo + "\nCollection Location: " + CollectionLocation + "\nExpiry Date: " + ExpiryDate;
+            return "\n<---TraceTogetherToken Info---> " + "\nSerial No.: " + SerialNo + "\nCollection Location: " + CollectionLocation + "\nExpiry Date: " + ExpiryDate.ToString("yyyy-MM-dd h:mm tt");
         }
 
     }

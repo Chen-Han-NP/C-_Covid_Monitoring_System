@@ -99,7 +99,7 @@ namespace COVID_19_Monitoring_System
 
         public override string ToString()
         {
-            return  "\n<---Travel Entry Info--->" + "\nLast Country of Embarkation: " + LastCoutryOfEmbarkation + "\nEntry Mode: " + EntryMode + "\nEntry Date: " + EntryDate + "\nSHN End Date: " + ShnEndDate + "\nTravels paid: " + IsPaid;
+            return  "\n<---Travel Entry Info--->" + "\nLast Country of Embarkation: " + LastCoutryOfEmbarkation + "\nEntry Mode: " + EntryMode + "\nEntry Date: " + EntryDate.ToString("yyyy-MM-dd h:mm tt") + "\nSHN End Date: " + ShnEndDate.ToString("yyyy-MM-dd h:mm tt") + "\nTravels paid: " + IsPaid;
         }
 
     }
