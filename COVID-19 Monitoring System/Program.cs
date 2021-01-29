@@ -24,10 +24,7 @@ using Newtonsoft.Json;
  * show whether the SHN Charges are fully paid off or not. 
  * If successful, it will show the money change. 
  * Otherwise, it will show the amount of money left to pay.
- * 
  * */
-
-
 
 
 namespace COVID_19_Monitoring_System
@@ -45,7 +42,6 @@ namespace COVID_19_Monitoring_System
             LoadBusinessLocation(businessList);
 
             
-
             //Task 3 
             List<Visitor> visitorList = new List<Visitor>();
             List<Resident> residentList = new List<Resident>();
@@ -171,8 +167,6 @@ namespace COVID_19_Monitoring_System
                                 TraceTogetherToken token = new TraceTogetherToken(newSerialNo, newCL, newExpiryDate);
 
                                 r.Token = token;
-
-
                             }
                         }
                     }
@@ -183,7 +177,6 @@ namespace COVID_19_Monitoring_System
                 /*-----------------Task 6---------------------*/
                 else if (choice == "4")
                     DisplayBusinessLocation(businessList);
-
 
 
 
@@ -349,7 +342,6 @@ namespace COVID_19_Monitoring_System
                                     Console.WriteLine("{0, -25} {1, -25} {2, -25}", p.SafeEntryList[i].CheckIn, p.SafeEntryList[i].CheckOut, p.SafeEntryList[i].Location.BusinessName);
 
                                 Console.WriteLine();
-
                             }
                         }
 
@@ -382,13 +374,11 @@ namespace COVID_19_Monitoring_System
                                 }
                                 else
                                     Console.WriteLine("Please do not enter Record No that has already been checked out!");
-
                             }
                             else
                                 Console.WriteLine("No such record found! ");
                         }
                     }
-
                 }
 
 
@@ -397,14 +387,12 @@ namespace COVID_19_Monitoring_System
                     DisplaySHNFacilities(SHNList);
 
 
-
                 /*-----------------Task 11---------------------*/
                 else if (choice == "10")
                 {
                     DisplayVisitors(visitorList);
                     
                     //Check whether the name is duplicated in the visitorlist
-
                     while (true)
                     {
                         Console.Write("\nEnter new visitor name: ");
@@ -552,9 +540,7 @@ namespace COVID_19_Monitoring_System
                             
                         }
                         else
-                        {
                             Console.WriteLine("Not eligible to add Travel Entry");
-                        }
                     }
                 }
 
@@ -627,20 +613,17 @@ namespace COVID_19_Monitoring_System
                                         }
                                     }
                                     if (amountPaid > amountToPay)
-                                    {
                                         Console.WriteLine("You have paid off your Charges! Here is your change ${0}!", (amountPaid - amountToPay).ToString("#0.00"));
-                                    }
+
                                     else if (amountToPay == amountPaid)
-                                    {
                                         Console.WriteLine("You have paid off your Charges!");
-                                    }
+
                                     else
                                     {
                                         double amountDue = amountToPay - amountPaid;
                                         p.AmountDue = amountDue;
                                         Console.WriteLine("You have paid ${0}! Amount left to pay: ${1}", amountPaid.ToString("#0.00"), amountDue.ToString("#0.00"));
                                     }
-
 
                                     foreach (TravelEntry te in p.TravelEntryList)
                                     {
@@ -653,13 +636,10 @@ namespace COVID_19_Monitoring_System
                                     Console.WriteLine("Payment not made.");
                                 else
                                     Console.WriteLine("Invalid input");
-
                             }
 
                             if (amountToPay == 0)
-                            {
                                 Console.WriteLine("You do not have to pay anything at the moment!");
-                            }
                         }
 
                         //If the person already has an amount due
@@ -691,16 +671,14 @@ namespace COVID_19_Monitoring_System
                                     Console.WriteLine("You have paid off your Charges! Here is your change ${0}!", (amountPaid - amountToPay).ToString("#0.00"));
                                 }
                                 else if (amountToPay == amountPaid)
-                                {
                                     Console.WriteLine("You have paid off your Charges!");
-                                }
+
                                 else
                                 {
                                     double amountDue = amountToPay - amountPaid;
                                     p.AmountDue = amountDue;
                                     Console.WriteLine("You have paid ${0}! Amount left to pay: ${1}", amountPaid.ToString("#0.00"), amountDue.ToString("#0.00"));
                                 }
-
 
                                 foreach (TravelEntry te in p.TravelEntryList)
                                 {
@@ -713,15 +691,10 @@ namespace COVID_19_Monitoring_System
                                 Console.WriteLine("Payment not made.");
                             else
                                 Console.WriteLine("Invalid input");
-
-
                         }
-                        
-                        
-                        
                     }
-
                 }
+
 
                 /*-----------------Task 13.1---------------------*/
                 else if (choice == "13")
@@ -811,23 +784,61 @@ namespace COVID_19_Monitoring_System
                 /*-----------------Task 13.2---------------------*/
                 else if (choice == "14")
                 {
+                    //Ask the user to enter the date they want to check for the SHN Status report
+                    DateTime reportDate = new DateTime();
+                    List<string> SHNReport = new List<string>();
 
+                    while (true)
+                    {
+                        try
+                        {
+                            Console.Write("\nPlease enter the date(dd/MM/yyyy) you want to check for SHN status: ");
+                            reportDate = Convert.ToDateTime(DateTime.ParseExact(Console.ReadLine(), "dd/MM/yyyy", CultureInfo.InvariantCulture));
+                            break;
+                        }
+                        catch (FormatException ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            Console.WriteLine("Please enter DateTime in (dd/MM/yyyy) format.");
+                        }
+                    }
+
+                    // Now loop through the personList and store the data which meets the requirement into the SHNReport list.
+                    foreach (Person p in personList)
+                    {
+                        foreach (TravelEntry te in p.TravelEntryList)
+                        {
+                            if (te.ShnEndDate.Date > reportDate)
+                            {
+                                string data = p.Name + "," + te.EntryDate.ToString("dd/MM/yyyy") + "," + te.ShnEndDate.ToString("dd/MM/yyyy") + "," + te.IsPaid + "," + te.ShnStay.FacilityName;
+                                SHNReport.Add(data);
+                            }
+                        }
+                    }
+                    if (SHNReport.Count == 0)
+                        Console.WriteLine("No record found!");
+
+                    //Now store the data from the list into the csv file.
+                    using (StreamWriter sw = new StreamWriter("SHNStatus.csv", false))
+                    {
+                        string header = "Name,SHN Start Date,SHN End Date,Travel is Paid,SHN Facility Name";
+                        sw.WriteLine(header);
+                        
+                        foreach (string data in SHNReport)
+                        {
+                            sw.WriteLine(data);
+                        }
+                        Console.WriteLine("Data is saved to 'SHNStatus.csv' successfully!");
+                    }
                 }
-
                 else
-                {
                     Console.WriteLine("Please enter a valid choice number!");
-                }
-
             }
-
-
-
         }
 
+    //<----------------------END OF MAIN PROGRAM-------------------------------->
 
-
-
+    //<--------------------------------METHODS---------------------------------->
         //Task 2.1
         //Make a method that calls the API and search for the detail of the SHN facility using the name
         static List<SHNFacility> GetSHNFacilityDetail()
@@ -854,11 +865,10 @@ namespace COVID_19_Monitoring_System
                     return shnList;
                 }
                 else
-                {
                     return null;
-                }
             }
         }
+
 
         //Display the SHN Facilities
         static void DisplaySHNFacilities(List<SHNFacility> fList)
@@ -871,40 +881,31 @@ namespace COVID_19_Monitoring_System
             }
         }
 
+
         //This method takes in person name and the personList, return either the index of the Person in the list OR a -1 value means that its not found.
         static int FindPerson(string n, List<Person> pList)
         {
             for (int i = 0; i < pList.Count; i++)
             {
                 if (pList[i].Name == n)
-                {
                     return i;
-                }
             }
             return -1;
         }
 
         
-
+        //This method loads and processes all the data from Person.csv and store the values into various list - personList,residentList,visitorList etc.
         static void LoadPersonData(List<Person> pList, List<SHNFacility> fList)
         {
             using (StreamReader sr = new StreamReader("Person.csv"))
             {
                 string s = sr.ReadLine();
                 string[] headers = s.Split(',');
-              /*  Console.WriteLine("Person.csv");
-                Console.WriteLine("{0, -8} {1, -8} {2, -20} {3, -16} {4, -11} {5, -12} {6, -11} {7, -25} {8, -15} {9, -25} {10, -15} {11, -16} {12, -16} {13, -20}",
-                    headers[0], headers[1], headers[2], headers[3], headers[4], headers[5], headers[6],
-                    headers[7], headers[8], headers[9], headers[10], headers[11], headers[12], headers[13]);*/
 
                 while ((s = sr.ReadLine()) != null)
                 {
                     //Task 1.1
                     string[] items = s.Split(',');
-               /*     Console.WriteLine("{0, -8} {1, -8} {2, -20} {3, -16} {4, -11} {5, -12} {6, -11} {7, -25} {8, -15} {9, -25} {10, -15} {11, -16} {12, -16} {13, -20}",
-                        items[0], items[1], items[2], items[3], items[4], items[5], items[6],
-                        items[7], items[8], items[9], items[10], items[11], items[12], items[13]);
-*/
                     //Check the type of the Person, either visitor or resident
                     if (items[0] == "visitor")
                     {
@@ -934,10 +935,8 @@ namespace COVID_19_Monitoring_System
                         }
                         visitor.AmountDue = 0;
                         pList.Add(visitor);
-                        
                     }
-
-
+                    // Now if the Person is a resident
                     else if (items[0] == "resident")
                     {
                         Resident resident = new Resident(items[1], items[2], DateTime.ParseExact(items[3], "dd/MM/yyyy", CultureInfo.InvariantCulture));
@@ -974,13 +973,13 @@ namespace COVID_19_Monitoring_System
                         }
                         resident.AmountDue = 0;
                         pList.Add(resident);
-
                     }
-
                 }
             }
         }
 
+
+        //This function loads the Business location data from BusinessLocation.csv
         static void LoadBusinessLocation(List<BusinessLocation> bList)
         {
             using (StreamReader sr = new StreamReader("BusinessLocation.csv"))
@@ -993,8 +992,8 @@ namespace COVID_19_Monitoring_System
                     bList.Add(new BusinessLocation(items[0], items[1], Convert.ToInt32(items[2])));
                 }
             }
-
         }
+
 
         static void DisplayBusinessLocation(List<BusinessLocation> bList)
         {
@@ -1038,10 +1037,10 @@ namespace COVID_19_Monitoring_System
             }
         }
 
+
         static void DisplayResidents(List<Resident> rList)
         {
             Console.WriteLine("\n<----------Residents List----------->");
-
             Console.WriteLine("{0, -15} {1, -20} {2, -20}", "Name", "Address", "Last Left Country");
             foreach (Resident r in rList)
             {
@@ -1052,6 +1051,7 @@ namespace COVID_19_Monitoring_System
             Console.WriteLine("{0, -10} {1,-15} {2, -24} {3, -22}", "Name", "Serial No.", "Collection Location", "Expiry Date");
             foreach (Resident r in rList)
             {
+                //Check if the Resident has any traceTogetherToken 
                 if (r.Token != null)
                     Console.WriteLine("{0, -10} {1,-15} {2, -24} {3, -22}", r.Name, r.Token.SerialNo, r.Token.CollectionLocation, r.Token.ExpiryDate.ToString("yyyy-MM-dd h:mm tt"));
             }
@@ -1073,10 +1073,9 @@ namespace COVID_19_Monitoring_System
                     }
                 }
             }
-
         }
 
-
+        //This random function generates a random serial number for a new TraceTogetherToken
         static String GetRandomSerialNo(List<String> sList)
         {
             while (true)
@@ -1085,14 +1084,11 @@ namespace COVID_19_Monitoring_System
                 int randomNum = random.Next(10000, 99999);
                 String output = "T" + randomNum;
                 if (!sList.Contains(output))
-                {
                     return output;
-                }
-
             }
-
         }
 
+       
         static void DisplaySafeEntryRecords(List<Person> pList)
         {
             bool isEmpty = true;
@@ -1100,6 +1096,7 @@ namespace COVID_19_Monitoring_System
             Console.WriteLine("\n<-----SafeEntry Records for everyone----->");
             foreach (Person p in pList)
             {
+                //Check if the person has any safe entry record in his safeentry list first
                 if (p.SafeEntryList.Count > 0)
                 {
                     isEmpty = false;
@@ -1113,18 +1110,12 @@ namespace COVID_19_Monitoring_System
                         
                         else
                             Console.WriteLine("{0, -25} {1, -25} {2, -20}", se.CheckIn, se.CheckOut, se.Location.BusinessName);
-                        
                     }
                 }
             }
 
             if (isEmpty)
-            {
                 Console.WriteLine("No records found!");
-            }
-
         }
-
-
     }
 }
