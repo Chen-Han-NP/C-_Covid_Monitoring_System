@@ -69,7 +69,7 @@ namespace COVID_19_Monitoring_System
             {
                 Console.Write("\n========COVID-19 Monitoring System========\n\n<=======For all Visitors/Residents=======>\n[1] Display all Visitors and Residents\n[2] Search & List Person Details\n[3] Assign/Replace TraceTogether Token \n\n<=========For Business Locations=========>\n[4] Display all Business Locations " +
                     "\n[5] Edit Business Location Capacity\n\n<============For Safe Entries============>\n[6] Display all SafeEntry records\n[7] Perform SafeEntry Check-In \n[8] Perform SafeEntry Check-out \n\n<===========For Travel Entries===========>\n[9]  Display all SHN facilities \n[10] Add Visitor" +
-                    "\n[11] Create a new Travel Entry Record \n[12] Calculate SHN Charges \n[0]  Exit \n\nOption: ");
+                    "\n[11] Create a new Travel Entry Record \n[12] Calculate SHN Charges \n\n<===========Generating Reports===========>\n[13] Generate Contact Tracing Report\n[14] Generate SHN Status Report \n[0] Exit \n\nOption: ");
                 string choice = Console.ReadLine();
 
 
@@ -723,11 +723,106 @@ namespace COVID_19_Monitoring_System
 
                 }
 
+                /*-----------------Task 13.1---------------------*/
+                else if (choice == "13")
+                {
+                    //Ask the user to enter the date they want to check for the safe entry report
+                    DateTime reportDate = new DateTime();
+                    while (true)
+                    {
+                        try
+                        {
+                            Console.Write("\nPlease enter the date(dd/MM/yyyy): ");
+                            reportDate = Convert.ToDateTime(DateTime.ParseExact(Console.ReadLine(), "dd/MM/yyyy", CultureInfo.InvariantCulture));
+                            break;
+                        }
+                        catch (FormatException ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            Console.WriteLine("Please enter DateTime in (dd/MM/yyyy) format.");
+                        }
+                    }
+
+                    // Now ask the user to select the Business location
+                    DisplayBusinessLocation(businessList);
+                    int businessIndex;
+                    BusinessLocation business = new BusinessLocation();
+
+                    while (true)
+                    {
+                        try
+                        {
+                            Console.Write("Please select a Business Location from the list: ");
+                            businessIndex = Convert.ToInt32(Console.ReadLine());
+                            businessIndex -= 1;
+                            business = businessList[businessIndex];
+                            break;
+                        }
+                        catch (FormatException ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            Console.WriteLine("Please enter a number!");
+                        }
+                        catch (ArgumentOutOfRangeException ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            Console.WriteLine("Please select a number of the list!");
+                        }
+                    }
+
+                    //Now loop through the person list and store the data in a list
+                    List<string> safeEntryReport = new List<string>(); 
+                    foreach (Person p in personList)
+                    {
+                        foreach (SafeEntry se in p.SafeEntryList)
+                        {
+                            if (se.Location.BusinessName == business.BusinessName && se.CheckIn.Date == reportDate)
+                            {
+                                if (se.CheckOut == new DateTime())
+                                {
+                                    string data = p.Name + "," + se.CheckIn.ToString("dd/MM/yyyy HH:mm") + "," + "" + "," + business.BusinessName;
+                                    safeEntryReport.Add(data);
+                                }
+                                else
+                                {
+                                    string data = p.Name + "," + se.CheckIn.ToString("dd/MM/yyyy HH:mm") + "," + se.CheckOut.ToString("dd/MM/yyyy HH:mm") + "," + business.BusinessName;
+                                    safeEntryReport.Add(data);
+                                }
+                            }
+                        }
+                    }
+                    if (safeEntryReport.Count == 0)
+                        Console.WriteLine("No Record found!");
+
+                    using (StreamWriter sw = new StreamWriter("ContactTracing.csv", false))
+                    {
+                        string header = "Name,Check-In,Check-Out,Business Name";
+                        sw.WriteLine(header);
+
+                        foreach (string data in safeEntryReport)
+                        {
+                            sw.WriteLine(data);
+                        }
+                        Console.WriteLine("Data is saved to 'ContactTracing.csv' successfully!");
+                    }
+                }
+
+
+                /*-----------------Task 13.2---------------------*/
+                else if (choice == "14")
+                {
+
+                }
+
                 else
                 {
                     Console.WriteLine("Please enter a valid choice number!");
                 }
+
             }
+
+
+
         }
 
 
@@ -1030,13 +1125,6 @@ namespace COVID_19_Monitoring_System
 
         }
 
-       static void Payment(List<Person> pList, double a, string p)
-        {
-
-
-            
-
-        }
 
     }
 }
