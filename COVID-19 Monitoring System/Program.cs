@@ -16,6 +16,7 @@ using Newtonsoft.Json;
  * Task 11
  *    1.  Cannot add a new visitor if a duplicated name is entered.
  *    2.  Passport number for visitors is unique though the name is different.
+ *    3.  A person can only pay for their SHN charges only after their Stay has ended
  * 
 */
 /*Other Possible Features added:
@@ -46,18 +47,13 @@ namespace COVID_19_Monitoring_System
             List<Visitor> visitorList = new List<Visitor>();
             List<Resident> residentList = new List<Resident>();
             List<String> serialNums = new List<String>();
-            
 
-            foreach (Person p in personList)
+            UpdateVisitorResidentList(personList, visitorList, residentList);
+
+            foreach (Resident r in residentList)
             {
-                if (p is Visitor v)
-                    visitorList.Add(v);
-                else if (p is Resident r)
-                {
-                    residentList.Add(r);
-                    if (r.Token != null)
-                        serialNums.Add(r.Token.SerialNo);
-                }
+                if (r.Token != null)
+                    serialNums.Add(r.Token.SerialNo);
             }
 
 
@@ -183,8 +179,8 @@ namespace COVID_19_Monitoring_System
                 /*-----------------Task 7---------------------*/
                 else if (choice == "5")
                 {
-                    bool found = false;
                     int businessNo = -1;
+                    BusinessLocation business = new BusinessLocation();
                     DisplayBusinessLocation(businessList);
                     while (true)
                     {
@@ -192,7 +188,7 @@ namespace COVID_19_Monitoring_System
                         {
                             Console.Write("\nEnter Business No. to edit: ");
                             businessNo = Convert.ToInt32(Console.ReadLine());
-                            
+                            business = businessList[businessNo - 1];
                             break;
                         }
 
@@ -200,34 +196,34 @@ namespace COVID_19_Monitoring_System
                         {
                             Console.WriteLine(ex.Message + "\nPlease try again.");
                         }
-                    }
-                    for (int i = 0; i < businessList.Count; i++)
-                    {
-                        if (i + 1 == businessNo)
+
+                        catch (ArgumentOutOfRangeException ex)
                         {
-                            found = true;
-                            int newMax = 0;
-                            Console.WriteLine("{0} found!", businessList[i].BusinessName);
-                            while (true)
-                            {
-                                try
-                                {
-                                    Console.Write("\nPlease enter the new Maximum Capcity: ");
-                                    newMax = Convert.ToInt32(Console.ReadLine());
-                                    break;
-                                }
-                                catch (FormatException ex)
-                                {
-                                    Console.WriteLine(ex.Message + "\nPlease try again.");
-                                }
-                            }
-                            businessList[i].MaximumCapacity = newMax;
-                            DisplayBusinessLocation(businessList);
-                            break;
+                            Console.WriteLine(ex.Message);
+                            Console.WriteLine("Please try again!");
                         }
                     }
-                    if (!found)
-                        Console.WriteLine("Invalid input or the Business name is not found!");
+                    
+                    Console.WriteLine("{0} found!", business.BusinessName);
+                    int newMax;
+                    while (true)
+                    {
+                        try
+                        {
+                            Console.Write("\nPlease enter the new Maximum Capcity: ");
+                            newMax = Convert.ToInt32(Console.ReadLine());
+                            if (newMax < business.VisitorsNow)
+                                Console.WriteLine("The new maximum capacity cannot be smaller than the current visitor count.");
+                            else
+                                break;
+                        }
+                        catch (FormatException ex)
+                        {
+                            Console.WriteLine(ex.Message + "\nPlease try again.");
+                        }
+                    }
+                    business.MaximumCapacity = newMax;
+                    DisplayBusinessLocation(businessList);
                 }
 
 
@@ -535,6 +531,7 @@ namespace COVID_19_Monitoring_System
                                 TravelEntry newTravelEntry = new TravelEntry(lastCountryTravelled, entryMode, DateTime.Now);
                                 newTravelEntry.CalculateSHNDuration();
                                 p.AddTravelEntry(newTravelEntry);
+                                UpdateVisitorResidentList(personList, visitorList, residentList);
                                 Console.WriteLine("A new travel entry has successfully added!");
                             }
                             
@@ -595,7 +592,7 @@ namespace COVID_19_Monitoring_System
                                 Console.WriteLine("Total amount to pay: ${0}.", amountToPay.ToString("#0.00"));
                                 Console.Write("Make payment now? (Y/N): ");
                                 string payNow = Console.ReadLine();
-                                if (payNow == "Y")
+                                if (payNow == "Y" || payNow == "y")
                                 {
                                     double amountPaid = 0;
                                     while (true)
@@ -632,7 +629,7 @@ namespace COVID_19_Monitoring_System
                                     Console.WriteLine("Payment successful.");
                                 }
 
-                                else if (payNow == "N")
+                                else if (payNow == "N" || payNow == "n")
                                     Console.WriteLine("Payment not made.");
                                 else
                                     Console.WriteLine("Invalid input");
@@ -648,7 +645,7 @@ namespace COVID_19_Monitoring_System
                             Console.Write("You have ${0} left to pay.\nPay now?(Y/N): ", p.AmountDue.ToString("#0.00"));
                             string payNow = Console.ReadLine();
                             double amountToPay = p.AmountDue;
-                            if (payNow == "Y")
+                            if (payNow == "Y" || payNow == "y")
                             {
                                 double amountPaid = 0;
                                 while (true)
@@ -687,7 +684,7 @@ namespace COVID_19_Monitoring_System
                                 Console.WriteLine("Payment successful.");
                             }
 
-                            else if (payNow == "N")
+                            else if (payNow == "N" || payNow == "n")
                                 Console.WriteLine("Payment not made.");
                             else
                                 Console.WriteLine("Invalid input");
@@ -810,8 +807,17 @@ namespace COVID_19_Monitoring_System
                         {
                             if (te.ShnEndDate.Date > reportDate)
                             {
-                                string data = p.Name + "," + te.EntryDate.ToString("dd/MM/yyyy") + "," + te.ShnEndDate.ToString("dd/MM/yyyy") + "," + te.IsPaid + "," + te.ShnStay.FacilityName;
-                                SHNReport.Add(data);
+                                if (te.ShnStay == null)
+                                {
+                                    string data = p.Name + "," + te.EntryDate.ToString("dd/MM/yyyy") + "," + te.ShnEndDate.ToString("dd/MM/yyyy") + "," + te.IsPaid + "," + "Nil";
+                                    SHNReport.Add(data);
+                                }
+                                else
+                                {
+                                    string data = p.Name + "," + te.EntryDate.ToString("dd/MM/yyyy") + "," + te.ShnEndDate.ToString("dd/MM/yyyy") + "," + te.IsPaid + "," + te.ShnStay.FacilityName;
+                                    SHNReport.Add(data);
+                                }
+                                
                             }
                         }
                     }
@@ -832,7 +838,7 @@ namespace COVID_19_Monitoring_System
                     }
                 }
                 else
-                    Console.WriteLine("Please enter a valid choice number!");
+                    Console.WriteLine("Please enter a valid option number!");
             }
         }
 
@@ -974,6 +980,23 @@ namespace COVID_19_Monitoring_System
                         resident.AmountDue = 0;
                         pList.Add(resident);
                     }
+                }
+            }
+        }
+
+
+        //This method updates the visitor and resident List 
+        static void UpdateVisitorResidentList(List<Person> pList, List<Visitor> vList, List<Resident> rList)
+        {
+            vList.Clear();
+            rList.Clear();
+            foreach (Person p in pList)
+            {
+                if (p is Visitor v)
+                    vList.Add(v);
+                else if (p is Resident r)
+                {
+                    rList.Add(r);
                 }
             }
         }
